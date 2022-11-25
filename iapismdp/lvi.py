@@ -7,7 +7,7 @@ import math
 from typing import AbstractSet, Dict, Mapping, Optional, Set, cast, Sequence, Tuple
 
 import numpy as np
-from iapismdp.processes.mdp import MDP
+from mdp_dp_rl.processes.mdp import MDP
 from numpy.typing import NDArray
 
 from iapismdp.custom_types import Action, State
