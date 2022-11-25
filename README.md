@@ -31,8 +31,7 @@ pip install -e .
 - Install [Lydia](https://github.com/whitemech/lydia). 
   We suggest to install it [building it from source](https://github.com/whitemech/lydia#build-from-source).
 
-- Install BLACK to check satisfiability of LTLf formulas.
-  At [this page](https://www.black-sat.org/en/stable/installation.html) you will find the releases for all the supported platform.
+~~Install BLACK to check satisfiability of LTLf formulas. At [this page](https://www.black-sat.org/en/stable/installation.html) you will find the releases for all the supported platform.~~
 
 ## How to run the code
 
