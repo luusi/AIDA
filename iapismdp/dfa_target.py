@@ -2,8 +2,8 @@
 from collections import deque
 from typing import Any, Mapping, Set, Tuple, Deque
 
-from iapismdp.processes.mdp import MDP
-from iapismdp.utils.generic_typevars import A, S
+from mdp_dp_rl.processes.mdp import MDP
+from mdp_dp_rl.utils.generic_typevars import A, S
 from pythomata import SimpleDFA
 from pythomata.core import DFA
 from pythomata.impl.symbolic import SymbolicDFA
