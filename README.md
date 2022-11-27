@@ -29,7 +29,7 @@ pip install -e .
   At [this page](https://www.graphviz.org/download/) you will find the releases for all the supported platform.
 
 - Install [Lydia](https://github.com/whitemech/lydia). 
-  We suggest to install it [building it from source](https://github.com/whitemech/lydia#build-from-source).
+  We suggest to install it by [building it from source](https://github.com/whitemech/lydia#build-from-source).
 
 ~~Install BLACK to check satisfiability of LTLf formulas. At [this page](https://www.black-sat.org/en/stable/installation.html) you will find the releases for all the supported platform.~~
 
