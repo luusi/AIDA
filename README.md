@@ -1,19 +1,21 @@
-# Industrial APIs composition via Markov Decision Processes (MDP)
+# AIDA
 
-Implementation a tool to compose Industrial APIs via Markov Decision Processes (MDP).
+[![](https://img.shields.io/github/license/luusi/aida)](./LICENSE)
+
+AIDA (Adaptive InDustrial APIs) is a tool for the composition of Industrial APIs for resilience manufacturing. 
+
+The proposed technique generates a plan for a manufacturing process by orchestrating manufacturing actors which are depicted as services (Industrial APIs).
 
 ## Preliminaries
 
-We assume the review uses a UNIX-like machine and that has Python 3.8 installed.
+We assume the user uses a **UNIX-like** machine and that has **Python 3.8** installed.
 
-- Set up the virtual environment. 
-First, install [Pipenv](https://pipenv-fork.readthedocs.io/en/latest/).
-Then:
+- To set up the virtual environment install [Pipenv](https://pipenv-fork.readthedocs.io/en/latest/), then execute
 ```
 pipenv install --dev
 ```
                     
-- this command is to start a shell within the Python virtual environment (to be done whenever a new terminal is opened):
+- Start a shell within the Python virtual environment (to be done whenever a new terminal is opened):
 ```
 pipenv shell
 ```
@@ -33,7 +35,7 @@ pip install -e .
 
 ~~Install BLACK to check satisfiability of LTLf formulas. At [this page](https://www.black-sat.org/en/stable/installation.html) you will find the releases for all the supported platform.~~
 
-## How to run the code
+## How to run the experiment
 
 - Run a Jupyter Notebook server:
 
