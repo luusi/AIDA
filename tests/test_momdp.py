@@ -1,7 +1,7 @@
 """Test for the MOMDP module."""
 import pytest
 
-from iapismdp.lmdp import LMDP
+from aida.lmdp import LMDP
 
 
 def test_momdp_with_rewards_not_tuples() -> None:

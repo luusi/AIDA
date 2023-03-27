@@ -1,7 +1,7 @@
 """Represent a target service."""
 from typing import Dict, Set
-from iapismdp.services import Service
-from iapismdp.custom_types import (
+from aida.services import Service
+from aida.custom_types import (
     Action,
     Prob,
     Reward,

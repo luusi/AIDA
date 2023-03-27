@@ -11,10 +11,10 @@ from mdp_dp_rl.utils.gen_utils import is_approx_eq, memoize, zip_dict_of_tuple
 from mdp_dp_rl.utils.generic_typevars import A, S
 from pythomata import SimpleDFA
 
-from iapismdp.constants import OTHER_ACTION_SYMBOL
-from iapismdp.custom_types import MDPDynamics, MOMDPDynamics
-from iapismdp.dfa_target import MdpDfa
-from iapismdp.services import Service, build_system_service
+from aida.constants import OTHER_ACTION_SYMBOL
+from aida.custom_types import MDPDynamics, MOMDPDynamics
+from aida.dfa_target import MdpDfa
+from aida.services import Service, build_system_service
 
 
 @memoize

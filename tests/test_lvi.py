@@ -4,8 +4,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from mdp_dp_rl.processes.mdp import MDP
 
-from iapismdp.lvi import lexicographic_value_iteration, value_iteration
-from iapismdp.lmdp import LMDP
+from aida.lvi import lexicographic_value_iteration, value_iteration
+from aida.lmdp import LMDP
 
 
 def build_chain_mdp(n: int, gamma: float = 0.99) -> MDP:

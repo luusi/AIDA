@@ -9,8 +9,8 @@ from pythomata.core import DFA
 from pythomata.impl.symbolic import SymbolicDFA
 from sympy.logic.boolalg import BooleanTrue
 
-from iapismdp.constants import DEFAULT_GAMMA
-from iapismdp.custom_types import MDPDynamics
+from aida.constants import DEFAULT_GAMMA
+from aida.custom_types import MDPDynamics
 
 
 def from_symbolic_automaton_to_declare_automaton(

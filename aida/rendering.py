@@ -4,9 +4,9 @@ from typing import Callable, Dict
 from graphviz import Digraph
 from mdp_dp_rl.processes.mdp import MDP
 
-from iapismdp.services import Service
-from iapismdp.target import Target
-from iapismdp.custom_types import Action, State
+from aida.services import Service
+from aida.target import Target
+from aida.custom_types import Action, State
 
 
 def service_to_graphviz(

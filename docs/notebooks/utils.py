@@ -12,14 +12,14 @@ from mdp_dp_rl.processes.mdp import MDP
 from mdp_dp_rl.processes.policy import Policy
 from mdp_dp_rl.utils.standard_typevars import VFDictType, QFDictType
 
-from iapismdp.dfa_target import MdpDfa
-from iapismdp.rendering import (
+from aida.dfa_target import MdpDfa
+from aida.rendering import (
     service_to_graphviz,
     target_to_graphviz,
     mdp_to_graphviz,
 )
-from iapismdp.services import Service
-from iapismdp.target import Target
+from aida.services import Service
+from aida.target import Target
 
 _image_classes = {"png": Image, "svg": SVG}
 _default_format = "png"

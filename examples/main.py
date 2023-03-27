@@ -4,15 +4,15 @@ from logaut import ltl2dfa
 from pylogics.parsers import parse_ltl
 from pythomata.impl.symbolic import SymbolicDFA
 
-from iapismdp.constants import OTHER_ACTION_SYMBOL
-from iapismdp.declare_utils import build_declare_assumption, alt_response, alt_succession
-from iapismdp.dfa_target import MdpDfa, mdp_from_dfa, from_symbolic_automaton_to_declare_automaton
-from iapismdp.lmdp import compute_composition_lmdp
-from iapismdp.rendering import (
+from aida.constants import OTHER_ACTION_SYMBOL
+from aida.declare_utils import build_declare_assumption, alt_response, alt_succession
+from aida.dfa_target import MdpDfa, mdp_from_dfa, from_symbolic_automaton_to_declare_automaton
+from aida.lmdp import compute_composition_lmdp
+from aida.rendering import (
     mdp_to_graphviz,
     service_to_graphviz,
 )
-from iapismdp.services import Service
+from aida.services import Service
 
 if __name__ == "__main__":
     all_symbols = {"a", "b", OTHER_ACTION_SYMBOL}

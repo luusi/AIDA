@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
-setup(name='iapismdp',
+setup(name='aida',
       version='0.1.0',
-      description='Implementation of stochastic service composition.',
+      description='Implementation of a tool for the composition of Industrial APIs for resilience manufacturing.',
       license='MIT',
-      packages=find_packages(include=['iapismdp*']),
+      packages=find_packages(include=['aida*']),
       zip_safe=False,
       install_requires=[
             "numpy",

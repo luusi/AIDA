@@ -4,7 +4,7 @@
 
 AIDA (Adaptive InDustrial APIs) is a tool for the composition of Industrial APIs for resilience manufacturing. 
 
-The proposed technique generates a plan for a manufacturing process by orchestrating manufacturing actors which are depicted as services (Industrial APIs).
+The proposed technique generates a plan for a manufacturing process by orchestrating manufacturing actors which are depicted as services.
 
 ## Preliminaries
 

@@ -7,10 +7,10 @@ from logaut import ltl2dfa
 from pylogics.parsers import parse_ltl
 from pythomata.impl.symbolic import SymbolicDFA
 
-from iapismdp.declare_utils import exactly_once, alt_response, alt_precedence, alt_succession, not_coexistence, \
+from aida.declare_utils import exactly_once, alt_response, alt_precedence, alt_succession, not_coexistence, \
     absence_2, build_declare_assumption
-from iapismdp.dfa_target import from_symbolic_automaton_to_declare_automaton, mdp_from_dfa, MdpDfa
-from iapismdp.rendering import mdp_to_graphviz
+from aida.dfa_target import from_symbolic_automaton_to_declare_automaton, mdp_from_dfa, MdpDfa
+from aida.rendering import mdp_to_graphviz
 
 
 def print_automaton_of_formula(formula_str: str, all_symbols: Set[str], name: str, output_dir: Path):
