@@ -10,7 +10,7 @@ The proposed technique generates a plan for a manufacturing process by orchestra
 
 We assume the user uses a **UNIX-like** machine and that has **Python 3.8** installed.
 
-- To set up the virtual environment install [Pipenv](https://pipenv-fork.readthedocs.io/en/latest/), then execute
+- To set up the virtual environment install [Pipenv](https://pipenv-fork.readthedocs.io/en/latest/) (<code>pip install pipenv</code>), then execute
 ```
 pipenv install --dev
 ```
