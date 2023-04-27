@@ -1,0 +1,101 @@
+{
+  "id": "stator_builder_service",
+  "attributes": {
+    "type": "service",
+    "transitions": {
+      "ready": {
+        "CONFIG[stator_builder]": [
+          {
+            "configured": 1.0
+          },
+          [0.0, 0.0]
+        ]
+      },
+      "configured": {
+        "CHECKED[stator_builder]": [
+          {
+            "executing": 0.95,
+            "broken": 0.05
+          },
+          [0.0, 0.0]
+          ]
+      },
+      "executing": {
+        "build_retrieve_stator": [
+          {
+            "ready": 0.95,
+            "broken": 0.05
+          },
+          [-1.0, 1.0]
+        ]
+      },
+      "broken": {
+        "RESTORE[stator_builder]": [
+          {
+            "repairing": 1
+          },
+          [-1.0, 0.0]
+        ]
+      },
+      "repairing": {
+        "REPAIRED[stator_builder]": [
+          {
+            "ready": 1
+          },
+          [0.0, 0.0]
+        ]
+      }
+    },
+    "initial_state": "ready",
+    "final_states": [
+      "ready"
+    ]
+  },
+  "features": {
+    "transition_function": {
+      "ready": {
+        "CONFIG[stator_builder]": [
+          {
+            "configured": 1.0
+          },
+          [0.0, 0.0]
+        ]
+      },
+      "configured": {
+        "CHECKED[stator_builder]": [
+          {
+            "executing": 0.95,
+            "broken": 0.05
+          },
+          [0.0, 0.0]
+          ]
+      },
+      "executing": {
+        "build_retrieve_stator": [
+          {
+            "ready": 0.95,
+            "broken": 0.05
+          },
+          [-1.0, 1.0]
+        ]
+      },
+      "broken": {
+        "RESTORE[stator_builder]": [
+          {
+            "repairing": 1
+          },
+          [-1.0, 0.0]
+        ]
+      },
+      "repairing": {
+        "REPAIRED[stator_builder]": [
+          {
+            "ready": 1
+          },
+          [0.0, 0.0]
+        ]
+      }
+    },
+    "current_state": "ready"
+  }
+}
