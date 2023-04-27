@@ -2,7 +2,7 @@ from functools import singledispatch
 from typing import Dict
 
 from local.IndustrialAPI.data import ServiceInstance, TargetInstance
-from stochastic_service_composition.types import MDPDynamics
+from aida.custom_types import MDPDynamics
 
 
 class Message:
