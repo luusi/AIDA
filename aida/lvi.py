@@ -11,6 +11,7 @@ from mdp_dp_rl.processes.mdp import MDP
 from numpy.typing import NDArray
 
 from aida.custom_types import Action, State
+from aida.dfa_target import MdpDfa
 from aida.lmdp import LMDP
 
 
