@@ -4,7 +4,7 @@
     "type": "service",
     "transitions": {
       "ready": {
-        "CONFIG[stator_builder]": [
+        "config_stator_builder": [
           {
             "configured": 1.0
           },
@@ -12,7 +12,7 @@
         ]
       },
       "configured": {
-        "CHECKED[stator_builder]": [
+        "checked_stator_builder": [
           {
             "executing": 0.95,
             "broken": 0.05
@@ -30,7 +30,7 @@
         ]
       },
       "broken": {
-        "RESTORE[stator_builder]": [
+        "restore_stator_builder": [
           {
             "repairing": 1
           },
@@ -38,7 +38,7 @@
         ]
       },
       "repairing": {
-        "REPAIRED[stator_builder]": [
+        "repaired_stator_builder": [
           {
             "ready": 1
           },
@@ -54,7 +54,7 @@
   "features": {
     "transition_function": {
       "ready": {
-        "CONFIG[stator_builder]": [
+        "config_stator_builder": [
           {
             "configured": 1.0
           },
@@ -62,7 +62,7 @@
         ]
       },
       "configured": {
-        "CHECKED[stator_builder]": [
+        "checked_stator_builder": [
           {
             "executing": 0.95,
             "broken": 0.05
@@ -80,7 +80,7 @@
         ]
       },
       "broken": {
-        "RESTORE[stator_builder]": [
+        "restore_stator_builder": [
           {
             "repairing": 1
           },
@@ -88,7 +88,7 @@
         ]
       },
       "repairing": {
-        "REPAIRED[stator_builder]": [
+        "repaired_stator_builder": [
           {
             "ready": 1
           },
