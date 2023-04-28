@@ -9,7 +9,7 @@ from pythomata.core import DFA
 from pythomata.impl.symbolic import SymbolicDFA
 from sympy.logic.boolalg import BooleanTrue
 
-from aida.constants import DEFAULT_GAMMA
+from aida.constants import GAMMA
 from aida.custom_types import MDPDynamics
 
 
@@ -55,7 +55,7 @@ class MdpDfa(MDP):
 
 
 def mdp_from_dfa(
-    dfa: SimpleDFA, reward: float = 1.0, gamma: float = DEFAULT_GAMMA
+    dfa: SimpleDFA, reward: float = 1.0, gamma: float = GAMMA
 ) -> MdpDfa:
     assert isinstance(dfa, SimpleDFA)
     transition_function: MDPDynamics = {}
