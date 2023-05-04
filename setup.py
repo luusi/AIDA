@@ -17,6 +17,8 @@ setup(name='aida',
             "networkx",
             "pydotplus",
             "datetime",
+            "connexion[swagger-ui]",
+            "aiohttp-jinja2",
             "mdp_dp_rl @ git+https://github.com/luusi/mdp-dp-rl.git#egg=mdp_dp_rl"
       ]
 )

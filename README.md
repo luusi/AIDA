@@ -20,7 +20,7 @@ We assume the user uses a **UNIX-like** machine and that has **Python 3.10** ins
 ```
 pipenv install --dev
 ```
-                    
+
 - Start a shell within the Python virtual environment (to be done whenever a new terminal is opened):
 ```
 pipenv shell
@@ -29,8 +29,6 @@ pipenv shell
 - Install the Python package in development mode:
 ```
 pip install -e .
-# alternatively:
-# python setup.py develop 
 ```
 
 - Install Graphviz to use rendering functionalities. 
@@ -39,7 +37,7 @@ pip install -e .
 - Install [Lydia](https://github.com/whitemech/lydia). 
   We suggest to install it by [building it from source](https://github.com/whitemech/lydia#build-from-source).
 
-- Generate Python client from OpenAPI v3.0 specification:
+- Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file with <code>chmod 777 scripts/generate-openapi-client.sh</code>):
 ```
 ./scripts/generate-openapi-client.sh
 ```
@@ -59,7 +57,7 @@ python app.py
 Then, run all the services (i.e. Industrial APIs):
 ```
 cd local
-python ./launch_devices.py
+python launch_devices.py
 ```
 Finally, run the orchestrator:
 ```
