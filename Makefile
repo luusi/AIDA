@@ -26,29 +26,29 @@ clean-test: ## remove test and coverage artifacts
 lint-all: black isort lint static ## run all linters
 
 lint: ## check style with flake8
-	flake8 iapismdp tests
+	flake8 aida tests
 
 static: ## static type checking with mypy
-	mypy iapismdp tests
+	mypy aida tests
 
 isort: ## sort import statements with isort
-	isort iapismdp tests
+	isort aida tests
 
 isort-check: ## check import statements order with isort
-	isort --check-only iapismdp tests
+	isort --check-only aida tests
 
 black: ## apply black formatting
-	black iapismdp tests
+	black aida tests
 
 black-check: ## check black formatting
-	black --check --verbose iapismdp tests
+	black --check --verbose aida tests
 
 pylint: ## run pylint
-	pylint iapismdp tests
+	pylint aida tests
 
 test: ## run tests quickly with the default Python
-	pytest tests --doctest-modules iapismdp tests/ \
-        --cov=iapismdp \
+	pytest tests --doctest-modules aida tests/ \
+        --cov=aida \
         --cov-report=xml \
         --cov-report=html \
         --cov-report=term

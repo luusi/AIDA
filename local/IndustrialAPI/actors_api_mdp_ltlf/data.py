@@ -2,11 +2,10 @@ import dataclasses
 from enum import Enum
 from typing import Any, Dict
 
-from local.Devices.utils import target_from_json
-from local.IndustrialAPI.helpers import ServiceId, TargetId
-from aida.services import Service, build_service_from_transitions
-from aida.target import Target
-from aida.custom_types import MDPDynamics, TargetDynamics
+from local.IndustrialAPI.actors_api_mdp_ltlf.helpers import ServiceId, TargetId
+from local.IndustrialAPI.actors_api_mdp_ltlf.services import Service, build_service_from_transitions
+from local.IndustrialAPI.utils.target import Target, build_target_from_transitions
+from local.IndustrialAPI.utils.types import MDPDynamics, TargetDynamics
 
 
 class ServiceType(Enum):
@@ -125,7 +124,6 @@ def _get_target_dynamics(target: Target) -> TargetDynamics:
 
 def target_to_json(target_id: TargetId, target: Target) -> Dict:
     result = dict()
-
     result["id"] = str(target_id)
     result["attributes"] = dict(
         type=ServiceType.TARGET.value,
@@ -135,3 +133,10 @@ def target_to_json(target_id: TargetId, target: Target) -> Dict:
     )
 
     return result
+
+def target_from_json(data: Dict) -> Target:
+    attributes = data["attributes"]
+    transitions = attributes["transitions"]
+    initial_state = attributes["initial_state"]
+    final_states = set(attributes["final_states"])
+    return build_target_from_transitions(transitions, initial_state, final_states)

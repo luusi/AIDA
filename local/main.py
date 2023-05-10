@@ -1,26 +1,24 @@
-import argparse
 import asyncio
 from typing import List
+from pathlib import Path
+import json
 
 from mdp_dp_rl.processes.det_policy import DetPolicy
 from aida.lmdp import LMDP
 
 from aida.constants import GAMMAS
 from aida.lvi import lexicographic_value_iteration
-from local.targetDFA_simulator import TargetSimulatorDFA
+from local.IndustrialAPI.run_target_mdp_ltlf import target_dfa, TargetDFA
 
-from local.target_DFA import target_dfa
-from local.IndustrialAPI.client_wrapper import ClientWrapper
-from local.IndustrialAPI.data import ServiceInstance
-from local.IndustrialAPI.helpers import setup_logger
+from local.IndustrialAPI.actors_api_mdp_ltlf.client_wrapper import ClientWrapper
+from local.IndustrialAPI.actors_api_mdp_ltlf.data import ServiceInstance
+from local.IndustrialAPI.actors_api_mdp_ltlf.helpers import setup_logger
 from aida.lmdp import compute_composition_lmdp
 
 logger = setup_logger("orchestrator")
 
-parser = argparse.ArgumentParser("main")
-parser.add_argument("--host", type=str, default="localhost", help="IP address of the HTTP IoT service.")
-parser.add_argument("--port", type=int, default=8080, help="IP address of the HTTP IoT service.")
-
+config_json = json.load(open('config.json', 'r'))
+mode = config_json['mode']
 
 async def main(host: str, port: int) -> None:
     client = ClientWrapper(host, port)
@@ -36,20 +34,23 @@ async def main(host: str, port: int) -> None:
 
     # start main loop
     old_policy = None
-    dfa_target = target_dfa()
-    target_simulator = TargetSimulatorDFA(dfa_target)
+
+    # target file
+    dfa_target = target_dfa(Path(f"IndustrialAPI/actors_api_{mode}/descriptions/target.tdl"))
+    target_simulator = TargetDFA(dfa_target)
+    
     system_state = [service.service_spec.initial_state for service in services]
     iteration = 0
-    while True:
-
-        lmdp: LMDP = compute_composition_lmdp(dfa_target, [service.current_service_spec for service in services], GAMMAS)
-        # set tolerance to stop value iteration earlier for faster convergence
-        result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
-        orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
+    
+    lmdp: LMDP = compute_composition_lmdp(dfa_target, [service.current_service_spec for service in services], GAMMAS)
+    # set tolerance to stop value iteration earlier for faster convergence
+    result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
+    orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
+    old_policy = orchestrator_policy
+    
+    while True:        
 
         # detect when policy changes
-        if old_policy is None:
-            old_policy = orchestrator_policy
         if old_policy.policy_data != orchestrator_policy.policy_data:
             logger.info(f"Optimal Policy has changed!\nold_policy = {old_policy}\nnew_policy={orchestrator_policy}")
         old_policy = orchestrator_policy
@@ -60,7 +61,7 @@ async def main(host: str, port: int) -> None:
 
         logger.info(f"Iteration: {iteration}")
         current_state = (tuple(system_state), current_target_state)
-        logger.info(f"Current state: {current_state}")
+        logger.info(f"Current state (system_state, target_state): {current_state}")
 
         orchestrator_choice = orchestrator_policy.get_action_for_state(current_state)
         if orchestrator_choice == "undefined":
@@ -96,5 +97,4 @@ async def main(host: str, port: int) -> None:
 
 
 if __name__ == "__main__":
-    arguments = parser.parse_args()
-    result = asyncio.get_event_loop().run_until_complete(main(arguments.host, arguments.port))
+    result = asyncio.get_event_loop().run_until_complete(main("localhost", 8080))

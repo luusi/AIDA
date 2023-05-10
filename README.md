@@ -6,12 +6,8 @@ AIDA (Adaptive InDustrial APIs) is a tool for the composition of Industrial APIs
 
 The proposed technique generates a plan for a manufacturing process by orchestrating manufacturing actors which are depicted as services.
 
-To show the correctness of the tool we propose the electric motor case study.
+[comment]: # (To show the correctness of the tool we propose the electric motor case study.)
 
-The following sections are:
-- Preliminaries
-- Structure of the code
-- Instructions on how to run the experiment
 ## Preliminaries
 
 We assume the user uses a **UNIX-like** machine and that has **Python 3.10** installed.
@@ -37,24 +33,29 @@ pip install -e .
 - Install [Lydia](https://github.com/whitemech/lydia). 
   We suggest to install it by [building it from source](https://github.com/whitemech/lydia#build-from-source).
 
-- Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file with <code>chmod 777 scripts/generate-openapi-client.sh</code>):
+- Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file):
 ```
-./scripts/generate-openapi-client.sh
+cd local/IndustrialAPI/actors_api_mdp_ltlf/openapi_client_script
+# chmod 777 generate-openapi-client.sh
+./generate-openapi-client.sh
 ```
 ## Structure of the code
-- `aida`: the library; reusable software components of the code where are defined services, target and the composition LMDP.
-- `local`: the library that shows the orchestration between the Industrial APIs.
-- `docs/notebooks/electric-motor-production.ipynb`: link to the notebook that shows the electric motor case study using Lexicographic Markov Decision Processes as described in the paper.
+- `aida`: the library that contains reusable software components of the code where services, target and the composition LMDP are defined.
+- `local`: the library that shows the orchestration of the Industrial APIs.
+- `docs/notebooks/electric-motor-production.ipynb`: the notebook that shows the electric motor case study using Lexicographic Markov Decision Processes.
 
 ## Instructions on how to run the experiment
-- To run the local code each of the following commands must be on a separate terminal with the virtual environment activated.
+- To run the local code each of the following commands must be executed on a separate terminal with the virtual environment activated.
 
-First, run the HTTP server that acts as service repository and communication middleware:
+First, run the HTTP server that acts as a service repository and a communication middleware:
 ```
 cd local/IndustrialAPI
 python app.py
 ```
-Then, run all the services (i.e. Industrial APIs):
+
+Then, put the <code>.sdl</code> and <code>.tdl</code> files representing services and target respectively in the relative directory, i.e,. [descriptions](local/IndustrialAPI/actors_api_mdp_ltlf/descriptions/). 
+
+Run all the services (i.e. Industrial APIs):
 ```
 cd local
 python launch_devices.py
@@ -64,13 +65,12 @@ Finally, run the orchestrator:
 cd local
 python main.py
 ```
-- To see the Jupyter Notebook run the server:
 
+- To see the Jupyter Notebook run the server:
 ```
 jupyter-notebook
 ```
 then, open the link and navigate through `docs/notebooks` and run the notebook [electric-motor-production.ipynb](./docs/notebooks/electric-motor-production.ipynb) to replicate the experiment.
 
 ## License
-
 The software is released under the MIT license.

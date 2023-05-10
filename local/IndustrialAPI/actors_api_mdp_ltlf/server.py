@@ -11,13 +11,12 @@ import websockets
 from websocket import WebSocket
 from websockets.exceptions import ConnectionClosedOK
 
-from local.IndustrialAPI.client_wrapper import WebSocketWrapper
-from local.IndustrialAPI.data import ServiceInstance, target_to_json, TargetInstance
-from local.IndustrialAPI.helpers import ServiceId, TargetId, setup_logger
-from local.IndustrialAPI.messages import from_json, Message, Register, Update, RegisterTarget, RequestTargetAction, \
+from local.IndustrialAPI.actors_api_mdp_ltlf.client_wrapper import WebSocketWrapper
+from local.IndustrialAPI.actors_api_mdp_ltlf.data import ServiceInstance, target_to_json, TargetInstance
+from local.IndustrialAPI.actors_api_mdp_ltlf.helpers import ServiceId, TargetId, setup_logger
+from local.IndustrialAPI.actors_api_mdp_ltlf.messages import from_json, Message, Register, Update, RegisterTarget, RequestTargetAction, \
     ResponseTargetAction, ExecuteServiceAction, ExecutionResult, DoMaintenance
-from aida.target import Target
-
+from local.IndustrialAPI.utils.target import Target
 
 logger = setup_logger(name="server")
 

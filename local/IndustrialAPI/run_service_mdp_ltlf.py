@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 import asyncio
 import json
+import sys
 import random
 from asyncio import CancelledError
 from functools import singledispatchmethod
 from pathlib import Path
 
-import click
 import websockets
 from websocket import WebSocket
 from websockets.exceptions import ConnectionClosedOK
 
-from local.wrappers import initialize_wrapper
-from local.IndustrialAPI.client_wrapper import WebSocketWrapper
-from local.IndustrialAPI.data import ServiceInstance
-from local.IndustrialAPI.helpers import setup_logger
-from local.IndustrialAPI.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance
-
+from local.IndustrialAPI.utils.wrappers import initialize_wrapper
+from local.IndustrialAPI.actors_api_mdp_ltlf.client_wrapper import WebSocketWrapper
+from local.IndustrialAPI.actors_api_mdp_ltlf.data import ServiceInstance
+from local.IndustrialAPI.actors_api_mdp_ltlf.helpers import setup_logger
+from local.IndustrialAPI.actors_api_mdp_ltlf.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance
 
 class ServiceDevice:
-
     def __init__(self, service_instance: ServiceInstance, host: str = "localhost", port: int = 8765):
         self.service_instance = service_instance
         self.wrapper = initialize_wrapper(self.service_instance.service_spec)
@@ -36,7 +34,7 @@ class ServiceDevice:
         return ServiceDevice(target_instance)
 
     async def async_main(self):
-        self.logger.info(f"Starting target '{self.service_instance.service_id}'...")
+        self.logger.info(f"Starting service '{self.service_instance.service_id}'...")
         async with websockets.connect(f"ws://{self.host}:{self.port}") as websocket:
             # register
             self.logger.info("Registering to server...")
@@ -52,7 +50,7 @@ class ServiceDevice:
                     self.logger.info("Close connection")
                     await websocket.close()
                     break
-
+    
     @singledispatchmethod
     async def _handle(self, message: Message, websocket: WebSocket):
         self.logger.error(f"cannot handle messages of type {message.TYPE}")
@@ -84,13 +82,9 @@ class ServiceDevice:
         self.logger.info(f"Repaired service: previous tf={previous_transition_function}, new tf={current_transition_function}")
 
 
-@click.command()
-@click.option("--spec", type=click.Path(exists=True, dir_okay=False))
-@click.option("--host", type=str, default="localhost")
-@click.option("--port", type=int, default=8765)
-def main(spec, host, port):
+def main(spec):
     """Start service."""
-    service_device = ServiceDevice.from_spec(Path(spec), host=host, port=port)
+    service_device = ServiceDevice.from_spec(Path(spec))
     loop = asyncio.get_event_loop()
     task = loop.create_task(service_device.async_main())
     try:
@@ -103,4 +97,5 @@ def main(spec, host, port):
 
 
 if __name__ == '__main__':
-    main()
+    spec = sys.argv[1]
+    main(Path(spec))

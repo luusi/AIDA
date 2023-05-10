@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Dict
 
-from local.IndustrialAPI.data import ServiceInstance, TargetInstance
+from local.IndustrialAPI.actors_api_mdp_ltlf.data import ServiceInstance, TargetInstance
 from aida.custom_types import MDPDynamics
 
 
