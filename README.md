@@ -35,7 +35,7 @@ pip install -e .
 
 - Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file):
 ```
-cd local/IndustrialAPI/actors_api_mdp_ltlf/openapi_client_script
+cd local/IndustrialAPI/actors_api_lmdp_ltlf/openapi_client_script
 # chmod 777 generate-openapi-client.sh
 ./generate-openapi-client.sh
 ```
