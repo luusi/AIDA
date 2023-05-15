@@ -8,17 +8,16 @@ from aida.lmdp import LMDP
 
 from aida.constants import GAMMAS
 from aida.lvi import lexicographic_value_iteration
-from local.IndustrialAPI.run_target_mdp_ltlf import target_dfa, TargetDFA
+from local.IndustrialAPI.run_target_lmdp_ltlf import target_dfa, TargetDFA
 
-from local.IndustrialAPI.actors_api_mdp_ltlf.client_wrapper import ClientWrapper
-from local.IndustrialAPI.actors_api_mdp_ltlf.data import ServiceInstance
-from local.IndustrialAPI.actors_api_mdp_ltlf.helpers import setup_logger
+from local.IndustrialAPI.actors_api_lmdp_ltlf.client_wrapper import ClientWrapper
+from local.IndustrialAPI.actors_api_lmdp_ltlf.data import ServiceInstance
+from local.IndustrialAPI.actors_api_lmdp_ltlf.helpers import setup_logger
 from aida.lmdp import compute_composition_lmdp
 
 logger = setup_logger("orchestrator")
 
-config_json = json.load(open('config.json', 'r'))
-mode = config_json['mode']
+mode = "lmdp_ltlf"
 
 async def main(host: str, port: int) -> None:
     client = ClientWrapper(host, port)

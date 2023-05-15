@@ -1,7 +1,7 @@
 """Represent a target service."""
 from typing import Dict, Set
 
-from local.IndustrialAPI.actors_api_mdp_ltlf.services import Service
+from local.IndustrialAPI.actors_api_lmdp_ltlf.services import Service
 from local.IndustrialAPI.utils.types import (
     Action,
     Prob,

@@ -4,7 +4,7 @@ from typing import Optional, Dict
 
 from local.IndustrialAPI.utils.constants import DEFAULT_DEGRADATION_COST, DEFAULT_DEGRADATION_PROBABILITY, \
     DEFAULT_MAX_BROKEN_PROB
-from local.IndustrialAPI.actors_api_mdp_ltlf.services import Service
+from local.IndustrialAPI.actors_api_lmdp_ltlf.services import Service
 from local.IndustrialAPI.utils.types import State
 
 
