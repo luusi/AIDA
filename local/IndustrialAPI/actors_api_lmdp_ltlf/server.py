@@ -15,7 +15,7 @@ from local.IndustrialAPI.actors_api_lmdp_ltlf.client_wrapper import WebSocketWra
 from local.IndustrialAPI.actors_api_lmdp_ltlf.data import ServiceInstance, target_to_json, TargetInstance
 from local.IndustrialAPI.actors_api_lmdp_ltlf.helpers import ServiceId, TargetId, setup_logger
 from local.IndustrialAPI.actors_api_lmdp_ltlf.messages import from_json, Message, Register, Update, RegisterTarget, RequestTargetAction, \
-    ResponseTargetAction, ExecuteServiceAction, ExecutionResult, DoMaintenance
+    ResponseTargetAction, ExecuteServiceAction, ExecutionResult, DoMaintenance, BreakService, BreakNextService
 from local.IndustrialAPI.utils.target import Target
 
 logger = setup_logger(name="server")
@@ -147,7 +147,7 @@ class WebsocketServer:
     async def _handle(self, message: Message, websocket: WebSocket) -> None:
         """Handle the message."""
 
-    @_handle.register
+    @_handle.register # for function overloading
     async def _handle_register(self, register: Register, websocket: WebSocket) -> None:
         """Handle the register message."""
         self.registry.add_service(register.service_instance, websocket)
@@ -177,6 +177,7 @@ class WebsocketServer:
         self._thread.join()
 
 
+# api class to handle requests
 class Api:
 
     SERVICES: Dict[ServiceId, ServiceInstance] = {}
@@ -207,7 +208,39 @@ class Api:
         if result is None:
             return f'Service with id {service_id} not found', 404
         return result.json, 200
+    
+    async def break_service(self, service_id: str):
+        self._log_call(self.break_service.__name__, dict(service_id=service_id))
+        service_id = str(service_id)
+        result = self.registry.get_service(service_id)
+        if result is None:
+            return f'Service with id {service_id} not found', 404
+        
+        websocket = self.registry.sockets_by_service_id[service_id]
+        request = BreakService("break")
+        await WebSocketWrapper.send_message(websocket, request)
 
+        result.current_state = "broken"
+        logger.info(f"Service '{service_id}' is now broken")
+        
+        return result.json, 200
+    
+    async def break_next_service(self, service_id: str):
+        self._log_call(self.break_service.__name__, dict(service_id=service_id))
+        service_id = str(service_id)
+        result = self.registry.get_service(service_id)
+        if result is None:
+            return f'Service with id {service_id} not found', 404
+        
+        websocket = self.registry.sockets_by_service_id[service_id]
+        request = BreakNextService("break")
+        await WebSocketWrapper.send_message(websocket, request)
+
+        result.service_spec.to_break = True
+        logger.info(f"Service '{service_id}' is set to break")
+        
+        return result.json, 200
+    
     async def get_targets(self):
         self._log_call(self.get_targets.__name__)
         return [target.json for target in self.registry.get_targets()], 200
@@ -236,6 +269,8 @@ class Api:
 
         return cast(ResponseTargetAction, response).action
 
+    # service_id = id of the service that should execute the action
+    # body = name of the action to execute
     async def execute_service_action(self, service_id: str, body: str):
         self._log_call(self.execute_service_action.__name__, dict(service_id=service_id, body=body))
         action_name = body
@@ -244,14 +279,22 @@ class Api:
         if service is None:
             return f'Service with id {service_id} not found', 404
         websocket = self.registry.sockets_by_service_id[service_id]
-        request = ExecuteServiceAction(action_name)
+        request = ExecuteServiceAction(action_name) # message containing the action to execute
         await WebSocketWrapper.send_message(websocket, request)
 
         # waiting reply from service
         response = await WebSocketWrapper.recv_message(websocket)
         assert response.TYPE == ExecutionResult.TYPE
 
+        logger.info(f"Service '{service_id}' returned result '{response}'")
+
+        # check if the result is acceptable or not
         execution_result = cast(ExecutionResult, response)
+        new_state = execution_result.new_state
+        logger.info(f"Service '{service_id}' returned state '{new_state}'")
+        if new_state not in service.service_spec.states:
+            return f"Service '{service_id}' returned an invalid state '{new_state}'", 400
+
         service.current_state = execution_result.new_state
         service.transition_function = execution_result.transition_function
         return "", 200

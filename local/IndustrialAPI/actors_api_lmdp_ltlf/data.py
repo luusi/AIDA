@@ -15,10 +15,12 @@ class ServiceType(Enum):
 
 @dataclasses.dataclass(eq=True)
 class ServiceInstance:
-    service_id: ServiceId
-    service_spec: Service
+    '''Service instance. Service representation during the execution.'''
+
+    service_id: ServiceId # Name of the service
+    service_spec: Service # Service specification derived from attributes (static properties)
     current_state: Any
-    transition_function: MDPDynamics
+    transition_function: MDPDynamics # Current transition function (from features)
 
     @classmethod
     def from_json(cls, obj: Dict) -> "ServiceInstance":
@@ -34,6 +36,7 @@ class ServiceInstance:
         initial_state = obj["attributes"]["initial_state"]
         final_states = set(obj["attributes"]["final_states"])
         service = build_service_from_transitions(transitions, initial_state, final_states)
+
         return ServiceInstance(
             service_id,
             service,

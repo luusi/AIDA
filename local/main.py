@@ -38,7 +38,7 @@ async def main(host: str, port: int) -> None:
     dfa_target = target_dfa(Path(f"IndustrialAPI/actors_api_{mode}/descriptions/target.tdl"))
     target_simulator = TargetDFA(dfa_target)
     
-    system_state = [service.service_spec.initial_state for service in services]
+    system_state = [service.current_state for service in services]
     iteration = 0
     
     lmdp: LMDP = compute_composition_lmdp(dfa_target, [service.current_service_spec for service in services], GAMMAS)
@@ -66,16 +66,44 @@ async def main(host: str, port: int) -> None:
         if orchestrator_choice == "undefined":
             logger.error(f"Execution failed: composition failed in system state {system_state}")
             break
+        
         # send_action_to_service
         target_action, service_index = orchestrator_choice
         logger.info(f"Chosen service: {service_index}, chosen action: {target_action}")
+        
         service_id = services[service_index].service_id
+        old_transition_function = services[service_index].transition_function
+
         logger.info(f"Sending message to thing: {service_id}, {target_action}")
-        await client.execute_service_action(service_id, target_action)
+        input("Press Enter to continue...")
+
+        # rompere il servizio
+        #logger.info(f"Breaking service {service_id}")
+        #service = services[service_index]
+        #service.current_state = "broken"
+        #await client.break_service(service_id)
+
+        input("Press Enter to continue..., check if service is broken")
+        response = await client.execute_service_action(service_id, target_action)
+        if response.status_code != 200:
+            logger.error(f"Execution failed: composition failed in system state {system_state} cause {service_id} is broken")
+            system_state[service_index] = "broken"
+            logger.info("Sleeping one second...")
+            await asyncio.sleep(1.0)
+            continue
+
         logger.info(f"Action has been executed")
+        # take new service instance state with the action executed
         new_service_instance = await client.get_service(service_id)
-        if services[service_index].transition_function != new_service_instance.transition_function:
+        
+        if old_transition_function != new_service_instance.transition_function:
             logger.info(f"Transition function for service {new_service_instance.service_id} has changed! Old: {services[service_index].transition_function}, New: {new_service_instance.transition_function}")
+            lmdp: LMDP = compute_composition_lmdp(dfa_target, [service.current_service_spec for service in services], GAMMAS)
+            # set tolerance to stop value iteration earlier for faster convergence
+            result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
+            orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
+            old_policy = orchestrator_policy
+        
         services[service_index] = new_service_instance
         system_state[service_index] = new_service_instance.current_state
 
@@ -83,12 +111,15 @@ async def main(host: str, port: int) -> None:
             target_simulator.update_state(target_action)
 
         if target_simulator.current_state in dfa_target.accepting_states:
-           target_simulator.reset()
+           logger.info(f"Target has reached accepting state {target_simulator.current_state}, stopping execution")
+           return
 
         logger.info(f"Next service state: {new_service_instance.current_state}")
-        old_transition_function = services[service_index].transition_function
+        #old_transition_function = services[service_index].transition_function
         if old_transition_function != new_service_instance.transition_function:
             logger.info(f"Transition function has changed!\nOld: {old_transition_function}\nNew: {new_service_instance.transition_function}")
+
+        input("Press Enter to continue...")
 
         logger.info("Sleeping one second...")
         await asyncio.sleep(1.0)

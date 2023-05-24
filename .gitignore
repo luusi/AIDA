@@ -1,7 +1,6 @@
 docs/local_tests
-local/IndustrialAPI/actors_api_mdp_ltlf/client
-local/IndustrialAPI/actors_api_mdp/client
-local/IndustrialAPI/actors_api_plan/client
+local/IndustrialAPI/actors_api_lmdp_ltlf/client
+*.txt
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,python,pycharm+all,vim,visualstudio,visualstudiocode,sublimetext
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,python,pycharm+all,vim,visualstudio,visualstudiocode,sublimetext

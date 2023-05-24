@@ -12,6 +12,8 @@ from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_get_targets import asyncio_detailed as get_targets
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_execute_service_action import asyncio_detailed as execute_service_action
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_get_service import asyncio_detailed as get_service
+from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_break_service import asyncio_detailed as break_service
+from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_break_next_service import asyncio_detailed as break_next_service
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client.api.services.app_server_api_do_maintenance import asyncio_detailed as do_maintenance
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client.models import Service
 from local.IndustrialAPI.actors_api_lmdp_ltlf.data import ServiceInstance, TargetInstance
@@ -52,6 +54,16 @@ class ClientWrapper:
         """Get all the services."""
         response = await get_service(service_id, client=self._client)
         return ServiceInstance.from_json(response.parsed.to_dict())
+    
+    async def break_service(self, service_id: ServiceId) -> ServiceInstance:
+        """Break the service."""
+        response = await break_service(service_id, client=self._client)
+        return ServiceInstance.from_json(response.parsed.to_dict())
+    
+    async def break_next_service(self, service_id: ServiceId) -> ServiceInstance:
+        """Break next the service."""
+        response = await break_next_service(service_id, client=self._client)
+        return ServiceInstance.from_json(response.parsed.to_dict())
 
     async def get_targets(self) -> List[TargetInstance]:
         """Get all the services."""
@@ -68,7 +80,7 @@ class ClientWrapper:
     async def execute_service_action(self, service_id: ServiceId, action: str) -> None:
         """Get next target action."""
         response = await execute_service_action(service_id, json_body=action, client=self._client)
-        return response.parsed
+        return response
 
     async def do_maintenance(self) -> None:
         """Get next target action."""

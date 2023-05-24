@@ -82,6 +82,9 @@ class TargetDFA:
         next_state = transitions_from_state[action]
         self._current_state = next_state
 
+    def update_current_state(self, new_state) -> None:
+        self._current_state = new_state
+
 
 def main(spec):
     """Create target."""

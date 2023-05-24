@@ -25,6 +25,22 @@ class Update(Message):
     def __init__(self, service_instance: ServiceInstance) -> None:
         self.service_instance = service_instance
 
+class BreakService(Message):
+    
+    TYPE = "break_service"
+
+    def __init__(self, action: str) -> None:
+        self.action = action
+
+
+class BreakNextService(Message):
+    
+    TYPE = "break_next_service"
+
+    def __init__(self, action: str) -> None:
+        self.action = action
+
+
 
 class RegisterTarget(Message):
 
@@ -94,6 +110,10 @@ def from_json(obj: Dict) -> Message:
             return ExecutionResult(payload["state"], payload["transition_function"])
         case DoMaintenance.TYPE:
             return DoMaintenance()
+        case BreakService.TYPE:
+            return BreakService(payload["action"])
+        case BreakNextService.TYPE:
+            return BreakNextService(payload["action"])
 
     raise ValueError(f"message type {message_type} not expected")
 
@@ -161,10 +181,24 @@ def execute_ack_to_json(message: ExecutionResult):
         )
     )
 
-
 @to_json.register
 def do_maintenance_to_json(message: DoMaintenance):
     return dict(
         type=message.TYPE,
         payload=dict()
+    )
+
+
+@to_json.register
+def break_service_to_json(message: BreakService):
+    return dict(
+        type=message.TYPE,
+        payload=dict(action=message.action)
+    )
+
+@to_json.register
+def break_next_service_to_json(message: BreakNextService):
+    return dict(
+        type=message.TYPE,
+        payload=dict(action=message.action)
     )

@@ -44,6 +44,34 @@ paths:
                 $ref: '#/components/schemas/Service'
         404:
           description: Service does not exist
+  "/services/break_service/{service_id}":
+    post:
+      tags: [ Services ]
+      operationId: app.server.api.break_service
+      summary: Break a service
+      parameters:
+        - $ref: '#/components/parameters/serviceId'
+      responses:
+        200:
+          description: Return broken service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+  "/services/break_next_service/{service_id}":
+    post:
+      tags: [ Services ]
+      operationId: app.server.api.break_next_service
+      summary: Break a service
+      parameters:
+        - $ref: '#/components/parameters/serviceId'
+      responses:
+        200:
+          description: Return service next to break
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
   /targets:
     get:
       tags: [ Services ]

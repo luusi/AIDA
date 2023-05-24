@@ -11,7 +11,7 @@ from local.IndustrialAPI.utils.types import (
 
 
 class Service:
-    """A service."""
+    """A service. Representation of the service abstraction, taken from the attributes."""
 
     def __init__(
         self,
@@ -20,6 +20,7 @@ class Service:
         final_states: Set[State],
         initial_state: State,
         transition_function: MOMDPDynamics,
+        to_break: bool = False,
     ):
         """
         Initialize the service.
@@ -34,7 +35,8 @@ class Service:
         self.actions = actions
         self.final_states = final_states
         self.initial_state = initial_state
-        self.transition_function = transition_function
+        self.transition_function = transition_function # it is taken from attributes["transitions"] in the json file
+        self.to_break = to_break
         self.__post_init__()
         
     @property
@@ -149,7 +151,8 @@ def build_deterministic_service_from_transitions(
         states, actions, final_states, initial_state, new_transition_function
     )
 
-
+# Create a service from the transition function, initial state and final states
+# all information is taken from the attributes of the json file (static properties of the service)
 def build_service_from_transitions(
     transition_function: MOMDPDynamics,
     initial_state: State,

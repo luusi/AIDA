@@ -15,23 +15,24 @@ from local.IndustrialAPI.utils.wrappers import initialize_wrapper
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client_wrapper import WebSocketWrapper
 from local.IndustrialAPI.actors_api_lmdp_ltlf.data import ServiceInstance
 from local.IndustrialAPI.actors_api_lmdp_ltlf.helpers import setup_logger
-from local.IndustrialAPI.actors_api_lmdp_ltlf.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance
+from local.IndustrialAPI.actors_api_lmdp_ltlf.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance, BreakService, BreakNextService
+from local.IndustrialAPI.utils import constants
 
 class ServiceDevice:
     def __init__(self, service_instance: ServiceInstance, host: str = "localhost", port: int = 8765):
         self.service_instance = service_instance
-        self.wrapper = initialize_wrapper(self.service_instance.service_spec)
-
-        self._current_state = self.service_instance.service_spec.initial_state
         self.logger = setup_logger(self.service_instance.service_id)
+        self._current_state = self.service_instance.service_spec.initial_state
+        self.wrapper = initialize_wrapper(self.service_instance.service_spec)
         self.host = host
         self.port = port
+        self.logger.info(f"Service '{self.service_instance.service_id}' {type(self.wrapper)}")
 
     @classmethod
     def from_spec(cls, spec_path: Path, **kwargs) -> "ServiceDevice":
         data = json.loads(spec_path.read_text())
-        target_instance = ServiceInstance.from_json(data)
-        return ServiceDevice(target_instance)
+        service_instance = ServiceInstance.from_json(data)
+        return ServiceDevice(service_instance)
 
     async def async_main(self):
         self.logger.info(f"Starting service '{self.service_instance.service_id}'...")
@@ -60,14 +61,30 @@ class ServiceDevice:
         self.logger.info(f"Processing message of type '{message.TYPE}'")
         action = message.action
         self.logger.info(f"received action '{message.action}'")
+
         starting_state = self._current_state
-        transitions_from_current_state = self.wrapper.transition_function[starting_state]
-        next_service_states, reward = transitions_from_current_state[action]
+        self.logger.info(f"Current state: {starting_state}")
+        transitions_from_current_state = self.wrapper.transition_function[starting_state] # Dict[Action, Tuple[Dict[State, Prob], Tuple[Reward, ...]]]
+
+        self.logger.info(f"Transitions from current state: {transitions_from_current_state}")
+        self.logger.info(f"Action: {action}")
+        if action not in transitions_from_current_state.keys(): # se non mi trovo in uno stato in cui posso fare quell'azione, rimango nello stato corrente
+            await WebSocketWrapper.send_message(websocket, ExecutionResult("null", self.wrapper.transition_function))
+            return
+
+        next_service_states, reward = transitions_from_current_state[action] # Tuple[Dict[State, Prob], Tuple[Reward, ...]]
         states, probabilities = zip(*next_service_states.items())
         new_state = random.choices(states, probabilities)[0]
+        if self.wrapper.current_state == constants.EXECUTING_STATE_NAME and self.wrapper._service.to_break:
+            new_state = constants.BROKEN_STATE_NAME
+            self.wrapper._service.to_break = False
         self._current_state = new_state
+        self.wrapper._current_state = new_state
         self.logger.info(f"Previous state='{starting_state}', current state={new_state}")
-        self.wrapper.update(starting_state, action)
+        
+        # update probabilities and costs of the wrapper
+        #self.wrapper.update(starting_state, action)
+
         message = ExecutionResult(new_state, self.wrapper.transition_function)
         self.logger.info(f"Updated transition function: {message.transition_function}")
         self.logger.info(f"Sending result to server")
@@ -80,6 +97,21 @@ class ServiceDevice:
         self.wrapper.reset()
         current_transition_function = self.wrapper.transition_function
         self.logger.info(f"Repaired service: previous tf={previous_transition_function}, new tf={current_transition_function}")
+
+    @_handle.register
+    async def _handle_break_service(self, message: BreakService, websocket: WebSocket):
+        self.logger.info(f"Processing message of type '{message.TYPE}'")
+        self.logger.info("Breaking service...")
+        self.wrapper._current_state = constants.BROKEN_STATE_NAME
+        self._current_state = constants.BROKEN_STATE_NAME
+        self.logger.info("Service broken")
+
+    @_handle.register
+    async def _handle_next_break_service(self, message: BreakNextService, websocket: WebSocket):
+        self.logger.info(f"Processing message of type '{message.TYPE}'")
+        self.logger.info("Setting next break service...")
+        self.wrapper._service.to_break = True
+        self.logger.info("Service set to break")
 
 
 def main(spec):
