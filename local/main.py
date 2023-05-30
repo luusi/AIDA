@@ -19,6 +19,8 @@ logger = setup_logger("orchestrator")
 
 mode = "lmdp_ltlf"
 
+file_plan = "plan.txt"
+
 async def main(host: str, port: int) -> None:
     client = ClientWrapper(host, port)
 
@@ -46,6 +48,9 @@ async def main(host: str, port: int) -> None:
     result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
     orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
     old_policy = orchestrator_policy
+
+    with open(file_plan, "w+") as f:
+        f.write("")
     
     while True:        
 
@@ -71,8 +76,9 @@ async def main(host: str, port: int) -> None:
         target_action, service_index = orchestrator_choice
         logger.info(f"Chosen service: {service_index}, chosen action: {target_action}")
         
-        service_id = services[service_index].service_id
-        old_transition_function = services[service_index].transition_function
+        service = services[service_index]
+        service_id = service.service_id
+        old_transition_function = service.transition_function
 
         logger.info(f"Sending message to thing: {service_id}, {target_action}")
         input("Press Enter to continue...")
@@ -82,6 +88,9 @@ async def main(host: str, port: int) -> None:
         #service = services[service_index]
         #service.current_state = "broken"
         #await client.break_service(service_id)
+
+        with open(file_plan, "a") as f:
+            f.write(f"{service_id}:{target_action}:{service.current_state}\n")
 
         input("Press Enter to continue..., check if service is broken")
         response = await client.execute_service_action(service_id, target_action)
@@ -103,6 +112,9 @@ async def main(host: str, port: int) -> None:
             result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
             orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
             old_policy = orchestrator_policy
+
+        with open(file_plan, "a") as f:
+            f.write(f"\tnew_state:{new_service_instance.current_state}\n")
         
         services[service_index] = new_service_instance
         system_state[service_index] = new_service_instance.current_state

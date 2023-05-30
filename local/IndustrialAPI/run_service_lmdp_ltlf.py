@@ -74,10 +74,13 @@ class ServiceDevice:
 
         next_service_states, reward = transitions_from_current_state[action] # Tuple[Dict[State, Prob], Tuple[Reward, ...]]
         states, probabilities = zip(*next_service_states.items())
-        new_state = random.choices(states, probabilities)[0]
+
+        new_state = random.choices(states, probabilities)[0] # TODO: modificare qui per fargli scegliere lo stato "positivo"
+        
         if self.wrapper.current_state == constants.EXECUTING_STATE_NAME and self.wrapper._service.to_break:
             new_state = constants.BROKEN_STATE_NAME
             self.wrapper._service.to_break = False
+        
         self._current_state = new_state
         self.wrapper._current_state = new_state
         self.logger.info(f"Previous state='{starting_state}', current state={new_state}")
