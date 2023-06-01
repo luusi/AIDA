@@ -32,7 +32,6 @@ class ServiceStatePage(tk.Frame):
 
         def disruptionHandler():
             highlighted_value = self.comboBox.get() #return the selected value
-            print(highlighted_value)
             self.change_rect_red(highlighted_value)
 
         self.grid_columnconfigure(0, weight=0)
@@ -53,7 +52,7 @@ class ServiceStatePage(tk.Frame):
         self.servicesLabel = ttk.Label(self.rightFrame, text= "Execution plan", font= LARGEFONT)
         self.servicesLabel.grid(row= 0, column= 0)
 
-        self.serviceslistBox = tk.Listbox(self.rightFrame, width= 70, height= 40, font= XSMALLFONT)
+        self.serviceslistBox = tk.Listbox(self.rightFrame, width= 60, height= 20, font= XSMALLFONT)
         self.serviceslistBox.grid(column= 0, row= 1)
 
         self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= SMALLFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
@@ -82,15 +81,16 @@ class ServiceStatePage(tk.Frame):
         target_file = config_json['target_file']
 
         app_path = "../local/IndustrialAPI/app.py"
-        self.p1 = subprocess.Popen([f"python {app_path}"], shell=True, preexec_fn=os.setsid)
+        self.p1 = subprocess.Popen([f"xterm -e python {app_path}"], shell=True, preexec_fn=os.setsid)
 
         time.sleep(1)
 
         launch_devices_path = "../local/IndustrialAPI/launch_devices.py"
-        self.p2 = subprocess.Popen([f"python {launch_devices_path} {folder} {mode}"], shell=True)
+        self.p2 = subprocess.Popen([f"xterm -e python {launch_devices_path} {folder} {mode}"], shell=True)
+
+        time.sleep(3)
 
         target = os.path.abspath(f"{folder}/{target_file}")
-        print(target)
         self.aida = AIDAUtils(target)
 
         asyncio.get_event_loop().run_until_complete(self.aida.compute_policy())
@@ -101,21 +101,18 @@ class ServiceStatePage(tk.Frame):
 
 
     async def _next(self):
-        service, state, executed_action = await self.aida.next_step()
+        service, state, executed_action, finished = await self.aida.next_step()
         if state == "broken":
             self.change_rect_red(service)
         elif state != "broken" and state != "normal":
             self.change_rect_orange(service)
         self.serviceslistBox.insert(END, f"{service} : {executed_action} - {state}")
-
-
-    def refreshComboBox(self): #very ugly way to update items in the listbox
-        data = list(self.service_map.keys())
-        #self.listBox.delete(0, END)
-        self.comboBox['values'] = data
-        self.comboBox.current(0) #load the first file, instead of showin a blank selection
-        #for file in data:
-        #    self.listBox.insert(END,str(file))
+        if finished:
+            msgbox.showinfo("Execution completed!", "Execution completed!")
+            self.startButton.config(state= "normal")
+            self.nextButton.config(state= "disabled")
+            self.killButton.config(state= "disabled")
+            self.kill()
 
     
     def next(self):
@@ -125,10 +122,16 @@ class ServiceStatePage(tk.Frame):
     def kill(self):
         print("Stopping...")
         os.killpg(os.getpgid(self.p1.pid), signal.SIGTERM)
-        os.killpg(os.getpgid(self.p2.pid), signal.SIGTERM)
+        #os.killpg(os.getpgid(self.p2.pid), signal.SIGTERM)
         self.startButton.config(state= "normal")
         self.nextButton.config(state= "disabled")
         self.killButton.config(state= "disabled")
+
+
+    def refreshComboBox(self): #very ugly way to update items in the listbox
+        data = list(self.service_map.keys())
+        self.comboBox['values'] = data
+        self.comboBox.current(0)
 
 
     def set_image_services(self):
@@ -142,9 +145,6 @@ class ServiceStatePage(tk.Frame):
         self.folder = data['folder']
         
         self.matrix = [data['matrix'][key] for key in ['rows', 'columns']]
-
-        print("this is the matrix: ")
-        print(self.matrix)
 
         service_map = {}
         # Iterate over the services and extract relevant information
@@ -171,7 +171,6 @@ class ServiceStatePage(tk.Frame):
         step_y = 900 / self.matrix[0]
         
         for service_label in self.service_map.keys():
-            print("service label: " + service_label)
             y = self.service_map[service_label][0]
             x = self.service_map[service_label][1]
             x1 = x * step_x
@@ -189,3 +188,4 @@ class ServiceStatePage(tk.Frame):
 
     def change_rect_orange(self, service_label):
         self.background_canvas.itemconfig(self.service_map_rectangle[service_label], fill="orange", stipple="gray50", outline="black")
+

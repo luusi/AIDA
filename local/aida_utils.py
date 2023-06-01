@@ -21,6 +21,7 @@ class AIDAUtils:
 
         self.dfa_target = target_dfa(Path(dfa_path))
         self.target_simulator = TargetDFA(self.dfa_target)
+        print(self.dfa_target.alphabet.symbols)
 
         self.policy : DetPolicy = None
 
@@ -57,7 +58,6 @@ class AIDAUtils:
         old_transition_function = service.transition_function
 
         response = await self.client.execute_service_action(service_id, target_action)
-        print(response)
         if response.status_code != 200:
             print("broken")
             return service_id, "broken", 1
@@ -76,13 +76,18 @@ class AIDAUtils:
         target_action, service_index = await self.get_action()
         print(target_action)
         service_id, new_state, recompute = await self.execute_action(service_index, target_action)
+        self.update_dfa_target(target_action)
         if recompute == 0:
             await self.recompute_lmdp()
-        return service_id, new_state, target_action
+        if self.check_execution_finished():
+            return service_id, new_state, target_action, True
+        return service_id, new_state, target_action, False
         
     def update_dfa_target(self, target_action):
         if target_action in self.dfa_target.alphabet:
+            print("UPDATED TARGET STATE")
             self.target_simulator.update_state(target_action)
+        print("TARGET NOT UPDATED")
 
     def stop_execution(self):
         if self.target_simulator.current_state in self.dfa_target.accepting_states:
@@ -91,4 +96,10 @@ class AIDAUtils:
     
     async def recompute_lmdp(self):
         self.policy = await self.compute_policy()
+
+
+    def check_execution_finished(self):
+        if self.target_simulator.current_state in self.dfa_target.accepting_states:
+            return True
+        return False
 
