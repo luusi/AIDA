@@ -38,7 +38,9 @@ def declare2ltlf(constraint, parameters):
         
 
 def target_dfa(spec: Path) -> SimpleDFA:
-    data_array = spec.read_text().split("\n")
+    spec_json = json.load(open(spec))
+    data_array = spec_json["target"]
+    #data_array = spec.read_text().split("\n")
     symbols = set()
     constraints = []
 

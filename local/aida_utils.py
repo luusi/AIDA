@@ -22,11 +22,11 @@ class AIDAUtils:
         self.dfa_target = target_dfa(Path(dfa_path))
         self.target_simulator = TargetDFA(self.dfa_target)
 
-        self.policy = self.compute_policy()
+        self.policy : DetPolicy = None
 
     async def get_services(self):
         services: List[ServiceInstance] = await self.client.get_services()
-        services = sorted(self.services, key=lambda x: x.service_id)
+        services = sorted(services, key=lambda x: x.service_id)
         return services
     
     async def compute_policy(self):
@@ -34,8 +34,7 @@ class AIDAUtils:
         lmdp: LMDP = compute_composition_lmdp(self.dfa_target, [service.current_service_spec for service in services], GAMMAS)
         # set tolerance to stop value iteration earlier for faster convergence
         result_vf, actions = lexicographic_value_iteration(lmdp, tol=1e-5)
-        orchestrator_policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
-        return orchestrator_policy
+        self.policy = DetPolicy({s: list(opt_actions_from_s)[0] for s, opt_actions_from_s in actions.items()})
 
     async def get_current_system_state(self):
         services = await self.get_services()
@@ -43,30 +42,43 @@ class AIDAUtils:
     
     async def get_current_state(self):
         system_state = await self.get_current_system_state()
-        return (tuple(system_state, self.target_simulator.current_state))
+        return (tuple(system_state), self.target_simulator.current_state)
     
     async def get_action(self):
         current_state = await self.get_current_state()
+        print(current_state)
         target_action, service_index = self.policy.get_action_for_state(current_state)
         return [target_action, service_index]
     
-    async def execute_action(self, target_action, service_index):
+    async def execute_action(self, service_index, target_action):
         services = await self.get_services()
         service = services[service_index]
         service_id = service.service_id
         old_transition_function = service.transition_function
 
         response = await self.client.execute_service_action(service_id, target_action)
+        print(response)
         if response.status_code != 200:
-            return "broken", 1
+            print("broken")
+            return service_id, "broken", 1
         else:
             updated_service = await self.client.get_service(service_id)
             new_state = updated_service.current_state
             new_transition_function = updated_service.transition_function
             if old_transition_function != new_transition_function:
-                return new_state, 0 # return 0 if the lmdp needs to be recomputed
+                print("transition function diversa")
+                return service_id, new_state, 0 # return 0 if the lmdp needs to be recomputed
             else:
-                return new_state, 1
+                print("transition function uguale")
+                return service_id, new_state, 1
+            
+    async def next_step(self):
+        target_action, service_index = await self.get_action()
+        print(target_action)
+        service_id, new_state, recompute = await self.execute_action(service_index, target_action)
+        if recompute == 0:
+            await self.recompute_lmdp()
+        return service_id, new_state, target_action
         
     def update_dfa_target(self, target_action):
         if target_action in self.dfa_target.alphabet:
