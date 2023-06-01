@@ -5,7 +5,6 @@ from pathlib import Path
 
 from graphviz import Digraph
 from IPython.core.display import HTML, SVG, display, Image
-import cv2
 from mdp_dp_rl.algorithms.dp.dp_analytic import DPAnalytic
 from mdp_dp_rl.processes.det_policy import DetPolicy
 from mdp_dp_rl.processes.mdp import MDP
