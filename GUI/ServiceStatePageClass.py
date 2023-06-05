@@ -14,27 +14,18 @@ import signal
 
 
 class ServiceStatePage(tk.Frame):
-    
-    config_file = ''
-    labels = [] # boxes corresonds to a collection of labels, each one inside a frame
-    service_map = {}
-    service_map_rectangle = {}
-    background_canvas = None
-
-
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-
+        self.config_file = ''
+        self.service_map = {}
+        self.service_map_rectangle = {}
+        self.background_canvas = None
         self.controller = controller
 
+        tk.Frame.__init__(self, parent)
+        self.grid_columnconfigure(0, weight=0)
         style = ttk.Style()
         style.configure('CustomButton.TButton', font=MEDIUMFONT)
 
-        def disruptionHandler():
-            highlighted_value = self.comboBox.get() #return the selected value
-            self.change_rect_red(highlighted_value)
-
-        self.grid_columnconfigure(0, weight=0)
         self.rightFrame = tk.Frame(self, width= 400, height= 100)
         
         buttonsFrame = tk.Frame(self.rightFrame)
@@ -58,10 +49,10 @@ class ServiceStatePage(tk.Frame):
         self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= SMALLFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
         self.comboBox.grid(column= 0, row= 2, pady=30)
 
-        disruptionButton = ttk.Button(self.rightFrame, text="Send disruption", command=disruptionHandler, style= 'CustomButton.TButton', width= 20)
+        disruptionButton = ttk.Button(self.rightFrame, text="Send disruption", command=self.disruptionHandler, style= 'CustomButton.TButton', width= 20)
         disruptionButton.grid(row=3, column=0, padx=10, pady=10)
 
-        homeButton = ttk.Button(buttonsFrame, text="Home", command=lambda: controller.show_mainPage(), style= 'CustomButton.TButton')
+        homeButton = ttk.Button(buttonsFrame, text="Home", command=lambda: self.goHome(), style= 'CustomButton.TButton')
         homeButton.grid(row=1, column=0, padx=10, pady=10)
 
         self.startButton = ttk.Button(buttonsFrame, text="Start", command= self.start, style= 'CustomButton.TButton') #no action
@@ -133,6 +124,11 @@ class ServiceStatePage(tk.Frame):
         self.comboBox['values'] = data
         self.comboBox.current(0)
 
+    
+    def disruptionHandler(self):
+        highlighted_value = self.comboBox.get() #return the selected value
+        self.change_rect_red(highlighted_value)
+
 
     def set_image_services(self):
         # Read the JSON file
@@ -189,3 +185,16 @@ class ServiceStatePage(tk.Frame):
     def change_rect_orange(self, service_label):
         self.background_canvas.itemconfig(self.service_map_rectangle[service_label], fill="orange", stipple="gray50", outline="black")
 
+
+    def resetPage(self):
+        self.config_file = ''
+        self.service_map = {}
+        self.service_map_rectangle = {}
+        self.background_canvas.delete("all")
+        self.background_canvas = None
+
+
+    def goHome(self):
+        self.controller.get_RunTimePage().resetPage()
+        self.resetPage()
+        self.controller.show_mainPage()

@@ -8,37 +8,25 @@ import glob
 LARGEFONT = ("Verdana", 24)
 
 class RunTimePage(tk.Frame):
-
-    config_file = ''
-    
     def __init__(self, parent, controller):    
-        
-        def execute():
-            if (len(self.targetsListBox.get_children())):
-                controller.show_testPage()
-            else:
-                msgbox.showerror("check your files", "Please, check the .tdl file and try again.")
-                self.controller.show_mainPage()
-        
-        style = ttk.Style()
-        style.configure('CustomButton.TButton', font=('Arial', 19)) 
-
+        self.config_file = ''
         self.controller = controller
-
+        
         tk.Frame.__init__(self, parent)
         self.grid_columnconfigure(0, weight=1)
+        style = ttk.Style()
+        style.configure('CustomButton.TButton', font=('Arial', 19)) 
+        
         
         buttonFrame = tk.Frame(self)
+        buttonFrame.grid(column=0, row= 5, pady= 50)
 
-        homeButton = ttk.Button(buttonFrame, text ="Home",
-                            command = lambda : controller.show_mainPage(), style='CustomButton.TButton')
+        homeButton = ttk.Button(buttonFrame, text ="Home", command = lambda : self.goHome(), style='CustomButton.TButton')
         homeButton.grid(row = 0, column = 0, padx = 10, pady = 10)
         
-        exectueButton = ttk.Button(buttonFrame, text= "EXECUTE", command= execute, style='CustomButton.TButton')
+        exectueButton = ttk.Button(buttonFrame, text= "EXECUTE", command= self.execute, style='CustomButton.TButton')
         exectueButton.grid(row= 0, column= 1, padx= 10, pady= 10)
 
-        buttonFrame.grid(column=0, row= 5, pady= 50)
-        
         servicesLabel = ttk.Label (self, text = "SERVICES:")
         servicesLabel.grid(row =1, column=0, pady= 50)
 
@@ -50,6 +38,14 @@ class RunTimePage(tk.Frame):
         
         self.targetsListBox = ttk.Treeview(self, height=2, columns=("Name", "Validity") , show='headings', padding= 5)
         self.targetsListBox.grid(row = 4, column= 0, padx= 15, pady=20)
+
+
+    def execute(self):
+        if (len(self.targetsListBox.get_children())):
+            self.controller.show_ServiceStatePage()
+        else:
+            msgbox.showerror("check your files", "Please, check the .tdl file and try again.")
+            self.controller.show_mainPage()
 
 
     def set_files(self):
@@ -114,3 +110,15 @@ class RunTimePage(tk.Frame):
                 print("1")
                 self.controller.show_mainPage()
                 break
+
+    
+    def resetPage(self):
+        self.config_file = ''
+        self.servicesListBox.delete(*self.servicesListBox.get_children())
+        self.targetsListBox.delete(*self.targetsListBox.get_children())
+
+
+    def goHome(self):
+        self.resetPage()
+        self.controller.get_ServiceStatePage().resetPage()
+        self.controller.show_mainPage()
