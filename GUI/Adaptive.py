@@ -76,7 +76,7 @@ class tkinterApp(tk.Tk):
 
 
     #This method check the selected radio button and call showframe function
-    def checkRadio(self, temp, radioStatus ,controller):
+    def checkRadio(self, temp, radioStatus):
         if radioStatus.get() == 2: #if RunTime RadioButton has been selected 
             self.show_frame(RunTimePage) #tell show_frame to load runTimePage
             config_file = filedialog.askopenfilename(
@@ -96,7 +96,7 @@ class tkinterApp(tk.Tk):
                 self.show_mainPage()
                 return
             
-            temp = self.getFrame(RunTimePage)
+            temp : RunTimePage = self.getFrame(RunTimePage)
             temp.config_file = str(config_file)
             #temp.check_files_config()
             temp.set_files()
@@ -142,7 +142,7 @@ class StartPage(tk.Frame):
   
         # button planning
         button1 = ttk.Button(self, text ="Instance planning",
-            command = lambda : controller.checkRadio(InstancePlanningPage, selected_value, controller),
+            command = lambda : controller.checkRadio(InstancePlanningPage, selected_value),
             style='CustomButton.TButton',
             width= 30
         )
@@ -150,7 +150,7 @@ class StartPage(tk.Frame):
   
         # button stochastic policy
         button2 = ttk.Button(self, text ="Stochastic policy",
-            command = lambda : controller.checkRadio(StochasticPolicyPage, selected_value, controller),
+            command = lambda : controller.checkRadio(StochasticPolicyPage, selected_value),
             style='CustomButton.TButton',
             width= 30
         )
@@ -158,7 +158,7 @@ class StartPage(tk.Frame):
   
         # button stochastic constraint-based policy
         button3 = ttk.Button(self, text ="Stochastic constraint-based policy",
-            command = lambda : controller.checkRadio(StochasticConstraintsBasedPolicy, selected_value, controller),
+            command = lambda : controller.checkRadio(StochasticConstraintsBasedPolicy, selected_value),
             style='CustomButton.TButton',
             width= 30
         )

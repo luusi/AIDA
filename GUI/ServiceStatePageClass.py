@@ -11,6 +11,7 @@ import subprocess
 import asyncio
 from constants import *
 import signal
+import numpy as np
 
 
 class ServiceStatePage(tk.Frame):
@@ -32,11 +33,22 @@ class ServiceStatePage(tk.Frame):
         buttonsFrame.grid(column=0, row = 5, pady=30)
 
         self.rightFrame.pack(side = "right", padx= 50)
+
+        self.topFrame = tk.Frame(self, width=1400)
         
+        servicesLabel = ttk.Label(self.topFrame , text= "Services" , font= LARGEFONT)
+        servicesLabel.pack(side= "top")
+        
+        self.topFrame.pack()
+
         self.backgroundFrame = tk.Frame(self, width= 1400)
         
-        servicesLabel = ttk.Label(self.backgroundFrame , text= "Services" , font= LARGEFONT)
-        servicesLabel.pack(side= "top")
+        self.whiteImage = np.zeros((1200, 900))
+        self.background_image = ImageTk.PhotoImage(Image.fromarray(self.whiteImage))
+        
+        self.background_canvas = tk.Canvas(self.backgroundFrame, width=1200, height=900)
+        self.image_on_canvas = self.background_canvas.create_image(0, 0, anchor=tk.NW, image=self.background_image)
+        self.background_canvas.pack()
 
         self.backgroundFrame.pack(side= "left", padx= 50)
 
@@ -158,10 +170,7 @@ class ServiceStatePage(tk.Frame):
         data = list(self.service_map.keys())
 
         self.background_image = ImageTk.PhotoImage(Image.open(self.image_path).resize((1200,900)))
-        #self.background_image_label = tk.Label(self.backgroundFrame, image= self.background_image)
-        self.background_canvas = tk.Canvas(self.backgroundFrame, width=1200, height=900)
-        self.background_canvas.create_image(0,0, anchor=tk.NW, image=self.background_image)
-        self.background_canvas.pack()
+        self.background_canvas.itemconfig(self.image_on_canvas, image = self.background_image)
         
         step_x = 1200 / self.matrix[1]
         step_y = 900 / self.matrix[0]
@@ -190,8 +199,8 @@ class ServiceStatePage(tk.Frame):
         self.config_file = ''
         self.service_map = {}
         self.service_map_rectangle = {}
-        self.background_canvas.delete("all")
-        self.background_canvas = None
+        #self.background_canvas.delete("all")
+        #self.background_canvas = None
 
 
     def goHome(self):
