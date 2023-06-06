@@ -3,11 +3,10 @@ from tkinter import ttk
 import os
 from tkinter import END
 from tkinter import messagebox as msgbox
-from tkinter import filedialog
 from constants import *
 
 
-class InstancePlanningPage(tk.Frame):
+class DesignTime(tk.Frame):
 
     def __init__(self, parent, controller):
         self.path = ''
@@ -22,27 +21,24 @@ class InstancePlanningPage(tk.Frame):
         self.sdl_template = [file for file in os.listdir("./templates") if file.endswith(".sdl")][0]
         self.tdl_template = [file for file in os.listdir("./templates") if file.endswith(".tdl")][0]
 
-        # FRAME DECLARATION & GRID
-        #frame placed in the top side of the window
         topFrame = tk.Frame(self, width = 200 , height= 30)
         topFrame.grid(row = 0, column= 0 )
-        #frame placed in the centre of the window
+
         centerFrame = tk.Frame(self,  highlightbackground= 'black', width = 200 , height= 200)
         centerFrame.grid(row = 1, column= 0 )
-        #frame placed in the right side of the window
+
         rightFrame = tk.Frame(self, width = 100 , height= 100, padx= 50, pady= 50)
         rightFrame.grid(row = 1, column= 1)
-        #frame palced at the bottom of the window
+ 
         bottomFrame = tk.Frame(self, width = 200 , height= 200)
         bottomFrame.grid(row = 8, column= 0 )
-        #frame used inside RightFrame
+
         buttonsFrame = tk.Frame(rightFrame)
         buttonsFrame.grid(row=2, column=0)
-
-        #LABEL & BUTTON DECLARATION & GRID  
+  
         resetButton = ttk.Button(bottomFrame, text="Reset", command= self.wipeText, style= 'CustomButton.TButton') #function to redet the whole design window, has not be implemented yet // TODO
         resetButton.grid(column=0, row=0, padx = 3, pady = 3)
-        #model button should load the file, button MODEL used to retrieve .tdl or .sdl files
+
         modelButton = ttk.Button(bottomFrame, text="SAVE", command= self.preSave, style= 'CustomButton.TButton') #function to load a file from local storage, for now just a single one
         modelButton.grid(column=1, row=0, padx = 3, pady = 3)
 
@@ -52,7 +48,7 @@ class InstancePlanningPage(tk.Frame):
         loadButton = ttk.Button(buttonsFrame, text="Load file", command= self.showFile ,style= 'CustomButton.TButton')
         loadButton.grid(column=1, row=0, padx = 8, pady = 3)
         
-        label = ttk.Label(centerFrame, text ="Instance Planning Design Time", font = LARGEFONT)
+        label = ttk.Label(centerFrame, text ="Design Time", font = LARGEFONT)
         label.grid(row = 0, column = 0)
 
         self.listBox = tk.Listbox(rightFrame, width= 30, height= 25, font= SMALLFONT)

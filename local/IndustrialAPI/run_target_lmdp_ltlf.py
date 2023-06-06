@@ -85,6 +85,12 @@ class TargetDFA:
         next_state = transitions_from_state[action]
         self._current_state = next_state
 
+    def next_state(self, action):
+        transitions_from_state = self.target.transition_function[self._current_state]
+        next_state = transitions_from_state[action]
+        print(next_state)
+        return next_state
+
     def update_current_state(self, new_state) -> None:
         self._current_state = new_state
 

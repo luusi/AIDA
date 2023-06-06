@@ -16,7 +16,7 @@ from aida.lmdp import compute_composition_lmdp
 
 class AIDAUtils:
 
-    def __init__(self, dfa_path):
+    def __init__(self, dfa_path, queue):
         self.client = ClientWrapper("localhost", 8080)
 
         self.dfa_target = target_dfa(Path(dfa_path))
@@ -24,6 +24,8 @@ class AIDAUtils:
         print(self.dfa_target.alphabet.symbols)
 
         self.policy : DetPolicy = None
+
+        self.queue = queue
 
     async def get_services(self):
         services: List[ServiceInstance] = await self.client.get_services()
@@ -56,32 +58,32 @@ class AIDAUtils:
         service = services[service_index]
         service_id = service.service_id
         old_transition_function = service.transition_function
-
+        current_state = service.current_state
         response = await self.client.execute_service_action(service_id, target_action)
         if response.status_code != 200:
             print("broken")
-            return service_id, "broken", 1
+            return service_id, current_state, "broken", 1
         else:
             updated_service = await self.client.get_service(service_id)
             new_state = updated_service.current_state
             new_transition_function = updated_service.transition_function
             if old_transition_function != new_transition_function:
                 print("transition function diversa")
-                return service_id, new_state, 0 # return 0 if the lmdp needs to be recomputed
+                return service_id, current_state, new_state, 0 # return 0 if the lmdp needs to be recomputed
             else:
                 print("transition function uguale")
-                return service_id, new_state, 1
+                return service_id, current_state, new_state, 1
             
     async def next_step(self):
         target_action, service_index = await self.get_action()
         print(target_action)
-        service_id, new_state, recompute = await self.execute_action(service_index, target_action)
+        service_id, current_state, new_state, recompute = await self.execute_action(service_index, target_action)
         self.update_dfa_target(target_action)
         if recompute == 0:
             await self.recompute_lmdp()
-        if self.check_execution_finished():
-            return service_id, new_state, target_action, True
-        return service_id, new_state, target_action, False
+        if await self.check_execution_finished():
+            return service_id, current_state, new_state, target_action, True
+        return service_id, current_state, new_state, target_action, False
         
     def update_dfa_target(self, target_action):
         if target_action in self.dfa_target.alphabet:
@@ -98,8 +100,24 @@ class AIDAUtils:
         self.policy = await self.compute_policy()
 
 
-    def check_execution_finished(self):
+    async def check_execution_finished(self):
         if self.target_simulator.current_state in self.dfa_target.accepting_states:
-            return True
+            target_action, _ = await self.get_action()
+            print(target_action)
+            if target_action in self.dfa_target.alphabet:
+                next_state = self.target_simulator.next_state(target_action)
+                print(next_state)
+                if next_state in self.dfa_target.accepting_states:
+                    print("false")
+                    return False
+                else:
+                    print("true")
+                    return True
         return False
+    
+
+    async def service_current_status(self, service_id):
+        service = await self.client.get_service(service_id)
+        return service.current_state
+    
 

@@ -7,7 +7,7 @@ import glob
 
 LARGEFONT = ("Verdana", 24)
 
-class RunTimePage(tk.Frame):
+class PreRunTimePage(tk.Frame):
     def __init__(self, parent, controller):    
         self.config_file = ''
         self.controller = controller
@@ -22,27 +22,27 @@ class RunTimePage(tk.Frame):
         buttonFrame.grid(column=0, row= 5, pady= 50)
 
         homeButton = ttk.Button(buttonFrame, text ="Home", command = lambda : self.goHome(), style='CustomButton.TButton')
-        homeButton.grid(row = 0, column = 0, padx = 10, pady = 10)
+        homeButton.grid(row = 0, column = 0)
         
         exectueButton = ttk.Button(buttonFrame, text= "EXECUTE", command= self.execute, style='CustomButton.TButton')
-        exectueButton.grid(row= 0, column= 1, padx= 10, pady= 10)
+        exectueButton.grid(row= 0, column= 1)
 
-        servicesLabel = ttk.Label (self, text = "SERVICES:")
-        servicesLabel.grid(row =1, column=0, pady= 50)
+        servicesLabel = ttk.Label (self, text = "SERVICES:", font= LARGEFONT)
+        servicesLabel.grid(row =1, column=0)
 
-        targetsLabel = ttk.Label ( self, text= "TARGETS:")
-        targetsLabel.grid(row = 3, column= 0, pady=10)
+        targetsLabel = ttk.Label ( self, text= "TARGETS:", font= LARGEFONT)
+        targetsLabel.grid(row = 3, column= 0)
 
-        self.servicesListBox = ttk.Treeview(self, height=12, columns=("Name", "Validity"), show='headings', padding= 5)
-        self.servicesListBox.grid(row = 2, column= 0, padx= 15, pady= 2)
+        self.servicesListBox = ttk.Treeview(self, height=17, columns=("Name", "Validity"), show='headings', padding= 5)
+        self.servicesListBox.grid(row = 2, column= 0)
         
         self.targetsListBox = ttk.Treeview(self, height=2, columns=("Name", "Validity") , show='headings', padding= 5)
-        self.targetsListBox.grid(row = 4, column= 0, padx= 15, pady=20)
+        self.targetsListBox.grid(row = 4, column= 0)
 
 
     def execute(self):
         if (len(self.targetsListBox.get_children())):
-            self.controller.show_ServiceStatePage()
+            self.controller.show_RunTimePage()
         else:
             msgbox.showerror("check your files", "Please, check the .tdl file and try again.")
             self.controller.show_mainPage()
@@ -120,5 +120,5 @@ class RunTimePage(tk.Frame):
 
     def goHome(self):
         self.resetPage()
-        self.controller.get_ServiceStatePage().resetPage()
+        self.controller.get_RunTimePage().resetPage()
         self.controller.show_mainPage()

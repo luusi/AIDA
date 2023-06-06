@@ -2,6 +2,7 @@
 	"image_path": "factory_layout.jpg",
 	"folder": "saved_models/lmdp_ltlf",
 	"mode": "lmdp_ltlf",
+	"breaking_type": 0,
 	"target_file": "target.tdl",
 	"matrix": {
 		"rows": 6,
