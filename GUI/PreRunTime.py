@@ -43,7 +43,7 @@ class PreRunTimePage(tk.Frame):
 
         servicesScrollbar.config(command = self.servicesListBox.yview)
         
-        self.targetsListBox = ttk.Treeview(self.backgroundFrame, height=2, columns=("Name", "Validity") , show='headings', padding= 5)
+        self.targetsListBox = ttk.Treeview(self.backgroundFrame, height=2, columns=("Name", "Validity") , show='headings')
         self.targetsListBox.grid(row = 4, column= 0)
 
 

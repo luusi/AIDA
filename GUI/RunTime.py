@@ -21,10 +21,14 @@ class RunTimePage(tk.Frame):
         self.config_file = ''
         self.service_map = {}
         self.service_map_rectangle = {}
+        self.service_map_action = {}
         self.background_canvas = None
         self.controller = controller
         self.initialRun = True
         self.n_runs = 1
+        self.step_x = 0
+        self.step_y = 0
+        self.star_images = []
 
         self.aida = None
         self.queueInfo = None
@@ -39,7 +43,7 @@ class RunTimePage(tk.Frame):
         buttonsFrame = tk.Frame(self.rightFrame)
         buttonsFrame.grid(column=0, row = 5, pady=40)
 
-        self.rightFrame.pack(side = "right", padx= 50)
+        self.rightFrame.pack(side = "right", padx= 20)
 
         self.topFrame = tk.Frame(self, width=1400)
         
@@ -57,7 +61,7 @@ class RunTimePage(tk.Frame):
         self.image_on_canvas = self.background_canvas.create_image(0, 0, anchor=tk.NW, image=self.background_image)
         self.background_canvas.pack()
 
-        self.backgroundFrame.pack(side= "left", padx= 50)
+        self.backgroundFrame.pack(side= "left", padx= 20)
 
         self.servicesLabel = ttk.Label(self.rightFrame, text= "Execution plan", font= LARGEFONT)
         self.servicesLabel.grid(column= 0, row = 0)
@@ -65,7 +69,7 @@ class RunTimePage(tk.Frame):
         servicesScrollbar = tk.Scrollbar(self.rightFrame, width=20)
         servicesScrollbar.grid(column=1, row=1)
 
-        self.serviceslistBox = tk.Listbox(self.rightFrame, width= 60, height= 20, font= XSMALLFONT, yscrollcommand=servicesScrollbar)
+        self.serviceslistBox = tk.Text(self.rightFrame, width= 50, height= 20, font= SMALLFONT, yscrollcommand=servicesScrollbar, state="disabled")
         self.serviceslistBox.grid(column= 0, row= 1, pady=20)
 
         servicesScrollbar.config(command = self.serviceslistBox.yview)
@@ -126,13 +130,23 @@ class RunTimePage(tk.Frame):
         self.runButton.config(state= "normal")
 
 
+    def insert_text(self, message):
+        self.serviceslistBox.config(state="normal")
+        self.serviceslistBox.insert(END, message)
+        self.serviceslistBox.config(state="disabled")
+
+
     async def _next(self):
         if self.initialRun:
-            self.serviceslistBox.insert(END, f"RUN {self.n_runs}")
+            self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
         service, previous_state, new_state, executed_action, finished = await self.aida.next_step()
+        if (previous_state == "executing" or previous_state == "ready") and (new_state == "ready" or new_state == "broken"):
+            self.service_map_action[service][0]+=1
+            self.update_star(service)
         self.change_rect_color(service, new_state)
-        self.serviceslistBox.insert(END, f"{service} : {executed_action} - {previous_state} -> {new_state}")
+        self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
+        self.serviceslistBox.see(END)
         if finished:
             self.initialRun = True
             self.n_runs+=1
@@ -143,13 +157,17 @@ class RunTimePage(tk.Frame):
     # method used in the immediate run and run methods
     async def _next_finished(self):
         if self.initialRun:
-            self.serviceslistBox.insert(END, f"RUN {self.n_runs}")
+            self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
         service, previous_state, new_state, executed_action, finished = await self.aida.next_step()
+        if (previous_state == "executing" or previous_state == "ready") and (new_state == "ready" or new_state == "broken"):
+            self.service_map_action[service][0]+=1
+            self.update_star(service)
         self.change_rect_color(service, new_state)
-        self.serviceslistBox.insert(END, f"{service} : {executed_action} - {previous_state} -> {new_state}")
+        self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
+        self.serviceslistBox.see(END)
         if finished:
-            msgbox.showinfo(f"Run completed!", f"Run {self.n_runs} completed!")
+            #msgbox.showinfo(f"Run completed!", f"Run {self.n_runs} completed!")
             self.initialRun = True
             self.n_runs+=1
         return service, previous_state, new_state, executed_action, finished
@@ -161,8 +179,8 @@ class RunTimePage(tk.Frame):
     def _immediateRun(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        t1 = loop.create_task(self._immediateRun_while())
-        loop.run_until_complete(t1)
+        #t1 = loop.create_task(self._immediateRun_while())
+        loop.run_until_complete(self._immediateRun_while())
     def immediateRun(self):
         thread = threading.Thread(target=self._immediateRun)
         thread.start()
@@ -175,8 +193,8 @@ class RunTimePage(tk.Frame):
     def _run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.create_task(self._run_while())
-        loop.run_forever()
+        #loop.create_task(self._run_while())
+        loop.run_until_complete(self._run_while())
     def run(self):
         thread = threading.Thread(target=self._run)
         thread.start()
@@ -225,30 +243,37 @@ class RunTimePage(tk.Frame):
 
         self.service_map = service_map
         
-        data = list(self.service_map.keys())
+        data = self.service_map.keys()
 
         self.background_image = ImageTk.PhotoImage(Image.open(self.image_path).resize((1200,900)))
         self.background_canvas.itemconfig(self.image_on_canvas, image = self.background_image)
         
-        step_x = 1200 / self.matrix[1]
-        step_y = 900 / self.matrix[0]
+        self.step_x = 1200 / self.matrix[1]
+        self.step_y = 900 / self.matrix[0]
         
-        for service_label in self.service_map.keys():
-            y = self.service_map[service_label][0]
-            x = self.service_map[service_label][1]
-            x1 = x * step_x
+        for service_label in data:
+            x = self.service_map[service_label][0]
+            y = self.service_map[service_label][1]
+            x1 = x * self.step_x
             if x1 == 0: x1 +=1
-            y1 = y * step_y
+            y1 = y * self.step_y
             if y1 == 0: y1 +=1
-            rectangle = self.background_canvas.create_rectangle(x1, y1, x1+step_x, y1+step_y, fill="green", stipple="gray50", outline="black")
-            self.background_canvas.create_text(x1+step_x/2, y1+step_y/2, text=service_label, font=SERVICE_FONT)
+            rectangle = self.background_canvas.create_rectangle(x1, y1, x1+self.step_x, y1+self.step_y, fill="green", stipple="gray50", outline="black")
+            self.background_canvas.create_text(x1+self.step_x/2, y1+self.step_y/2, text=service_label, font=SERVICE_FONT)
             self.service_map_rectangle[service_label] = rectangle
+            self.service_map_action[service_label] = [0, []]
 
 
     def reset_on_start(self):
         for service_label in self.service_map_rectangle.keys():
             self.background_canvas.itemconfig(self.service_map_rectangle[service_label], fill="green", stipple="gray50", outline="black")
-        self.serviceslistBox.delete(0, END)
+            self.service_map_action[service_label] = [0, []]
+        self.star_images = []
+        self.n_runs = 1
+        self.initialRun = True
+        self.serviceslistBox.config(state="normal")
+        self.serviceslistBox.delete(1.0, END)
+        self.serviceslistBox.config(state="disabled")
 
 
     def change_rect_color(self, service, state):
@@ -263,6 +288,24 @@ class RunTimePage(tk.Frame):
                 self.background_canvas.itemconfig(self.service_map_rectangle[service], fill="yellow", stipple="gray50", outline="black")
             case "ready":
                 self.background_canvas.itemconfig(self.service_map_rectangle[service], fill="green", stipple="gray50", outline="black")
+
+
+    def update_star(self, service_label):
+        x_width = 30
+        n_action = self.service_map_action[service_label][0]
+        star_elem = self.service_map_action[service_label][1]
+        x = self.service_map[service_label][0] * self.step_x
+        y = self.service_map[service_label][1] * self.step_y
+        if n_action > len(star_elem):
+            posX = x+(x_width*(n_action-1))
+            posY = y+2
+            if posX + x_width > x + self.step_x:
+                posX = x+((x_width*(n_action))%(self.step_x//x_width))
+                posY = y+x_width
+            print(posX, posY)
+            self.star_images.append(ImageTk.PhotoImage(Image.open("utils/star.png").resize((x_width, x_width))))
+            star_elem = self.background_canvas.create_image(posX, posY, anchor=tk.NW, image=self.star_images[len(self.star_images)-1])
+            self.service_map_action[service_label][1].append(star_elem)
       
 
     def resetPage(self):
@@ -277,7 +320,9 @@ class RunTimePage(tk.Frame):
         except:
             print("services not killed or already killed")
 
-        self.serviceslistBox.delete(0, END)
+        self.serviceslistBox.config(state="normal")
+        self.serviceslistBox.delete(1.0, END)
+        self.serviceslistBox.config(state="disabled")
 
 
     def goHome(self):

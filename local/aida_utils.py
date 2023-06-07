@@ -19,13 +19,19 @@ class AIDAUtils:
     def __init__(self, dfa_path, queue):
         self.client = ClientWrapper("localhost", 8080)
 
-        self.dfa_target = target_dfa(Path(dfa_path))
-        self.target_simulator = TargetDFA(self.dfa_target)
-        print(self.dfa_target.alphabet.symbols)
+        self.dfa_path = dfa_path
+        self.dfa_target = None
+        self.target_simulator = None
+        #print(self.dfa_target.alphabet.symbols)
+        self.set_targetDFA()
 
         self.policy : DetPolicy = None
 
         self.queue = queue
+
+    def set_targetDFA(self):
+        self.dfa_target = target_dfa(Path(self.dfa_path))
+        self.target_simulator = TargetDFA(self.dfa_target)
 
     async def get_services(self):
         services: List[ServiceInstance] = await self.client.get_services()
@@ -82,6 +88,7 @@ class AIDAUtils:
         if recompute == 0:
             await self.recompute_lmdp()
         if await self.check_execution_finished():
+            self.set_targetDFA()
             return service_id, current_state, new_state, target_action, True
         return service_id, current_state, new_state, target_action, False
         
