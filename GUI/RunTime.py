@@ -60,10 +60,15 @@ class RunTimePage(tk.Frame):
         self.backgroundFrame.pack(side= "left", padx= 50)
 
         self.servicesLabel = ttk.Label(self.rightFrame, text= "Execution plan", font= LARGEFONT)
-        self.servicesLabel.grid(row= 0, column= 0)
+        self.servicesLabel.grid(column= 0, row = 0)
 
-        self.serviceslistBox = tk.Listbox(self.rightFrame, width= 60, height= 20, font= XSMALLFONT)
+        servicesScrollbar = tk.Scrollbar(self.rightFrame, width=20)
+        servicesScrollbar.grid(column=1, row=1)
+
+        self.serviceslistBox = tk.Listbox(self.rightFrame, width= 60, height= 20, font= XSMALLFONT, yscrollcommand=servicesScrollbar)
         self.serviceslistBox.grid(column= 0, row= 1, pady=20)
+
+        servicesScrollbar.config(command = self.serviceslistBox.yview)
 
         self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= SMALLFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
         self.comboBox.grid(column= 0, row= 2, pady=5)
@@ -83,10 +88,10 @@ class RunTimePage(tk.Frame):
         self.killButton = ttk.Button(buttonsFrame, text="Kill", command=self.kill, style= 'CustomButton.TButton', state="disabled") #debug button to reset background to green
         self.killButton.grid(row=2, column=1, padx=10, pady=10)
 
-        self.immediateRunButton = ttk.Button(buttonsFrame, text="Immediate Run", command=self.immediateRun, style= 'CustomButton.TButton')
+        self.immediateRunButton = ttk.Button(buttonsFrame, text="Immediate Run", command=self.immediateRun, style= 'CustomButton.TButton', state="disabled")
         self.immediateRunButton.grid(row=3, column=0)
 
-        self.runButton = ttk.Button(buttonsFrame, text="Run", command=self.run, style='CustomButton.TButton')
+        self.runButton = ttk.Button(buttonsFrame, text="Run", command=self.run, style='CustomButton.TButton', state="disabled")
         self.runButton.grid(row=3, column=1)
 
 
@@ -117,6 +122,8 @@ class RunTimePage(tk.Frame):
         self.startButton.config(state= "disabled")
         self.nextButton.config(state= "normal")
         self.killButton.config(state= "normal")
+        self.immediateRunButton.config(state= "normal")
+        self.runButton.config(state= "normal")
 
 
     async def _next(self):
@@ -129,27 +136,11 @@ class RunTimePage(tk.Frame):
         if finished:
             self.initialRun = True
             self.n_runs+=1
-        #    msgbox.showinfo("Execution completed!", "Execution completed!")
-        #    self.startButton.config(state= "normal")
-        #    self.nextButton.config(state= "disabled")
-        #    self.killButton.config(state= "disabled")
-        #    self.kill()
-
-    
     def next(self):
         asyncio.get_event_loop().run_until_complete(self._next())
 
 
-    def update_gui(self):
-        #while self.queue.not_empty:
-        elem = self.queue.get()
-        print(elem)
-        service, previous_state, new_state, executed_action, _ = elem
-        self.change_rect_color(service, new_state)
-        self.serviceslistBox.insert(END, f"{service} : {executed_action} - {previous_state} -> {new_state}")
-        
-        self.controller.after(1000, self.update_gui)
-
+    # method used in the immediate run and run methods
     async def _next_finished(self):
         if self.initialRun:
             self.serviceslistBox.insert(END, f"RUN {self.n_runs}")
@@ -158,10 +149,10 @@ class RunTimePage(tk.Frame):
         self.change_rect_color(service, new_state)
         self.serviceslistBox.insert(END, f"{service} : {executed_action} - {previous_state} -> {new_state}")
         if finished:
+            msgbox.showinfo(f"Run completed!", f"Run {self.n_runs} completed!")
             self.initialRun = True
             self.n_runs+=1
         return service, previous_state, new_state, executed_action, finished
-    
 
     def _immediateRun_while(self):
         finished = False
@@ -170,8 +161,8 @@ class RunTimePage(tk.Frame):
     def _immediateRun(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.create_task(self._immediateRun_while())
-        loop.run_forever()
+        t1 = loop.create_task(self._immediateRun_while())
+        loop.run_until_complete(t1)
     def immediateRun(self):
         thread = threading.Thread(target=self._immediateRun)
         thread.start()
@@ -197,6 +188,8 @@ class RunTimePage(tk.Frame):
         self.startButton.config(state= "normal")
         self.nextButton.config(state= "disabled")
         self.killButton.config(state= "disabled")
+        self.immediateRunButton.config(state= "disabled")
+        self.runButton.config(state= "disabled")
 
 
     def refreshComboBox(self): #very ugly way to update items in the listbox

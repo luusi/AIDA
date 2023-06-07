@@ -17,26 +17,33 @@ class PreRunTimePage(tk.Frame):
         style = ttk.Style()
         style.configure('CustomButton.TButton', font=('Arial', 19)) 
         
-        
         buttonFrame = tk.Frame(self)
         buttonFrame.grid(column=0, row= 5, pady= 50)
 
         homeButton = ttk.Button(buttonFrame, text ="Home", command = lambda : self.goHome(), style='CustomButton.TButton')
-        homeButton.grid(row = 0, column = 0)
+        homeButton.grid(row = 0, column = 0, padx=10)
         
         exectueButton = ttk.Button(buttonFrame, text= "EXECUTE", command= self.execute, style='CustomButton.TButton')
-        exectueButton.grid(row= 0, column= 1)
+        exectueButton.grid(row= 0, column= 1, padx=10)
 
-        servicesLabel = ttk.Label (self, text = "SERVICES:", font= LARGEFONT)
+        self.backgroundFrame = tk.Frame(self)
+        self.backgroundFrame.grid(column= 0, row= 1)
+
+        servicesLabel = ttk.Label (self.backgroundFrame, text = "SERVICES:", font= LARGEFONT)
         servicesLabel.grid(row =1, column=0)
 
-        targetsLabel = ttk.Label ( self, text= "TARGETS:", font= LARGEFONT)
+        targetsLabel = ttk.Label (self.backgroundFrame, text= "TARGETS:", font= LARGEFONT)
         targetsLabel.grid(row = 3, column= 0)
 
-        self.servicesListBox = ttk.Treeview(self, height=17, columns=("Name", "Validity"), show='headings', padding= 5)
-        self.servicesListBox.grid(row = 2, column= 0)
+        servicesScrollbar = tk.Scrollbar(self.backgroundFrame, width=17)
+        servicesScrollbar.grid(row=2, column=1)
+
+        self.servicesListBox = ttk.Treeview(self.backgroundFrame, height=17, columns=("Name", "Validity"), show='headings', yscrollcommand=servicesScrollbar)
+        self.servicesListBox.grid(row = 2, column= 0, pady=10)
+
+        servicesScrollbar.config(command = self.servicesListBox.yview)
         
-        self.targetsListBox = ttk.Treeview(self, height=2, columns=("Name", "Validity") , show='headings', padding= 5)
+        self.targetsListBox = ttk.Treeview(self.backgroundFrame, height=2, columns=("Name", "Validity") , show='headings', padding= 5)
         self.targetsListBox.grid(row = 4, column= 0)
 
 
