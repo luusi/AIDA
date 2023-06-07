@@ -189,7 +189,7 @@ class RunTimePage(tk.Frame):
         finished = False
         while not finished:
             _,_,_,_,finished = asyncio.get_event_loop().run_until_complete(self._next_finished())
-            time.sleep(2)
+            time.sleep(1)
     def _run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
