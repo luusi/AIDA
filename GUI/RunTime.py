@@ -69,12 +69,12 @@ class RunTimePage(tk.Frame):
         servicesScrollbar = tk.Scrollbar(self.rightFrame, width=20)
         servicesScrollbar.grid(column=1, row=1)
 
-        self.serviceslistBox = tk.Text(self.rightFrame, width= 50, height= 20, font= SMALLFONT, yscrollcommand=servicesScrollbar, state="disabled")
-        self.serviceslistBox.grid(column= 0, row= 1, pady=20)
+        self.planListBox = tk.Text(self.rightFrame, width= 40, height= 20, font= SMALLFONT, yscrollcommand=servicesScrollbar, state="disabled")
+        self.planListBox.grid(column= 0, row= 1, pady=20)
 
-        servicesScrollbar.config(command = self.serviceslistBox.yview)
+        servicesScrollbar.config(command = self.planListBox.yview)
 
-        self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= SMALLFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
+        self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= XMEDIUMFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
         self.comboBox.grid(column= 0, row= 2, pady=5)
 
         disruptionButton = ttk.Button(self.rightFrame, text="Break", command=self.breakHandler, style= 'CustomButton.TButton')
@@ -131,9 +131,9 @@ class RunTimePage(tk.Frame):
 
 
     def insert_text(self, message):
-        self.serviceslistBox.config(state="normal")
-        self.serviceslistBox.insert(END, message)
-        self.serviceslistBox.config(state="disabled")
+        self.planListBox.config(state="normal")
+        self.planListBox.insert(END, message)
+        self.planListBox.config(state="disabled")
 
 
     async def _next(self):
@@ -146,7 +146,7 @@ class RunTimePage(tk.Frame):
             self.update_star(service)
         self.change_rect_color(service, new_state)
         self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
-        self.serviceslistBox.see(END)
+        self.planListBox.see(END)
         if finished:
             self.initialRun = True
             self.n_runs+=1
@@ -165,7 +165,7 @@ class RunTimePage(tk.Frame):
             self.update_star(service)
         self.change_rect_color(service, new_state)
         self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
-        self.serviceslistBox.see(END)
+        self.planListBox.see(END)
         if finished:
             #msgbox.showinfo(f"Run completed!", f"Run {self.n_runs} completed!")
             self.initialRun = True
@@ -216,9 +216,11 @@ class RunTimePage(tk.Frame):
         self.comboBox.current(0)
     
     def breakHandler(self):
-        highlighted_value = self.comboBox.get() #return the selected value
-        
-        self.change_rect_red(highlighted_value)
+        with open(self.config_file) as json_file:
+            data = json.load(json_file)
+        break_type = data["breaking_type"]
+        service_label = self.comboBox.get() #return the selected value
+        #self._send_disruption(service_label, break_type)
 
 
     def set_image_services(self):
@@ -248,8 +250,8 @@ class RunTimePage(tk.Frame):
         self.background_image = ImageTk.PhotoImage(Image.open(self.image_path).resize((1200,900)))
         self.background_canvas.itemconfig(self.image_on_canvas, image = self.background_image)
         
-        self.step_x = 1200 / self.matrix[1]
-        self.step_y = 900 / self.matrix[0]
+        self.step_x = 1200 // self.matrix[1]
+        self.step_y = 900 // self.matrix[0]
         
         for service_label in data:
             x = self.service_map[service_label][0]
@@ -259,7 +261,13 @@ class RunTimePage(tk.Frame):
             y1 = y * self.step_y
             if y1 == 0: y1 +=1
             rectangle = self.background_canvas.create_rectangle(x1, y1, x1+self.step_x, y1+self.step_y, fill="green", stipple="gray50", outline="black")
-            self.background_canvas.create_text(x1+self.step_x/2, y1+self.step_y/2, text=service_label, font=SERVICE_FONT)
+            text_service_label = service_label
+            if "_" in text_service_label:
+                tokens = text_service_label.split("_")
+                text_service_label = ""
+                for elem in tokens:
+                    text_service_label+=f"\n{elem}"
+            self.background_canvas.create_text(x1+self.step_x/2, y1+self.step_y/2, text=text_service_label, font=SERVICE_FONT)
             self.service_map_rectangle[service_label] = rectangle
             self.service_map_action[service_label] = [0, []]
 
@@ -271,9 +279,9 @@ class RunTimePage(tk.Frame):
         self.star_images = []
         self.n_runs = 1
         self.initialRun = True
-        self.serviceslistBox.config(state="normal")
-        self.serviceslistBox.delete(1.0, END)
-        self.serviceslistBox.config(state="disabled")
+        self.planListBox.config(state="normal")
+        self.planListBox.delete(1.0, END)
+        self.planListBox.config(state="disabled")
 
 
     def change_rect_color(self, service, state):
@@ -320,9 +328,9 @@ class RunTimePage(tk.Frame):
         except:
             print("services not killed or already killed")
 
-        self.serviceslistBox.config(state="normal")
-        self.serviceslistBox.delete(1.0, END)
-        self.serviceslistBox.config(state="disabled")
+        self.planListBox.config(state="normal")
+        self.planListBox.delete(1.0, END)
+        self.planListBox.config(state="disabled")
 
 
     def goHome(self):

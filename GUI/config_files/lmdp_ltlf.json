@@ -1,6 +1,6 @@
 {
 	"image_path": "factory_layout.jpg",
-	"folder": "saved_models/lmdp_ltlf",
+	"folder": "saved_models/lmdp_case1",
 	"mode": "lmdp_ltlf",
 	"breaking_type": 0,
 	"target_file": "target.tdl",
