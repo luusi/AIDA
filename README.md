@@ -68,7 +68,6 @@ cd local/IndustrialAPI/actors_api_lmdp_ltlf/openapi_client_script
 - `docs/notebooks/electric-motor-production.ipynb`: the notebook that shows the electric motor case study using Lexicographic Markov Decision Processes.
 
 ## Run the tool
-To run the tool you need to run the GUI script
 ```bash
 cd GUI
 python Adaptive.py
