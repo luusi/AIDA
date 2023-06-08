@@ -98,7 +98,7 @@ class AIDAUtils:
         return False
     
     async def recompute_lmdp(self):
-        self.policy = await self.compute_policy()
+        await self.compute_policy()
 
 
     async def check_execution_finished(self):

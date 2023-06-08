@@ -77,6 +77,9 @@ class ServiceDevice:
         
         #states, probabilities = zip(*next_service_states.items())
         #new_state = random.choices(states, probabilities)[0] 
+
+        print(self.wrapper.current_state)
+        print(self.wrapper._service.to_break)
         
         if self.wrapper.current_state == constants.EXECUTING_STATE_NAME and self.wrapper._service.to_break:
             new_state = constants.BROKEN_STATE_NAME

@@ -78,8 +78,8 @@ class RunTimePage(tk.Frame):
         self.comboBox = ttk.Combobox(self.rightFrame,width= 25, height= 15, font= XMEDIUMFONT, state= "readonly") #readonly avoid the user from entering values arbitarily
         self.comboBox.grid(column= 0, row= 2, pady=5)
 
-        disruptionButton = ttk.Button(self.rightFrame, text="Break", command=self.breakHandler, style= 'CustomButton.TButton')
-        disruptionButton.grid(row=3, column=0)
+        self.disruptionButton = ttk.Button(self.rightFrame, text="Break", command=self.breakHandler, style= 'CustomButton.TButton', state= "disabled")
+        self.disruptionButton.grid(row=3, column=0)
 
         homeButton = ttk.Button(buttonsFrame, text="Home", command=lambda: self.goHome(), style= 'CustomButton.TButton')
         homeButton.grid(row=1, column=0, padx=10, pady=10)
@@ -129,6 +129,7 @@ class RunTimePage(tk.Frame):
         self.killButton.config(state= "normal")
         self.immediateRunButton.config(state= "normal")
         self.runButton.config(state= "normal")
+        self.disruptionButton.config(state= "normal")
 
 
     def insert_text(self, message):
@@ -216,6 +217,7 @@ class RunTimePage(tk.Frame):
         self.killButton.config(state= "disabled")
         self.immediateRunButton.config(state= "disabled")
         self.runButton.config(state= "disabled")
+        self.disruptionButton.config(state= "disabled")
 
 
     def refreshComboBox(self): #very ugly way to update items in the listbox
@@ -225,12 +227,13 @@ class RunTimePage(tk.Frame):
         
         
     async def _breakHandler(self, service_label):
-        await self.aida.send_disruption(service_label)       
+        await self.aida.break_service(service_label)       
     def breakHandler(self):
         with open(self.config_file) as json_file:
             data = json.load(json_file)
         break_type = data["breaking_type"]
         service_label = self.comboBox.get() #return the selected value
+        print(service_label)
         asyncio.get_event_loop().run_until_complete(self._breakHandler(service_label))
 
 
