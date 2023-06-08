@@ -117,4 +117,7 @@ class AIDAUtils:
         service = await self.client.get_service(service_id)
         return service.current_state
     
+    
+    async def break_service(self, service_id):
+        await self.client.break_next_service(service_id)
 

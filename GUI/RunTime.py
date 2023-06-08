@@ -26,6 +26,7 @@ class RunTimePage(tk.Frame):
         self.controller = controller
         self.initialRun = True
         self.n_runs = 1
+        self.n_prob_mod = 1
         self.step_x = 0
         self.step_y = 0
         self.star_images = []
@@ -137,6 +138,9 @@ class RunTimePage(tk.Frame):
 
 
     async def _next(self):
+        if self.n_runs == self.n_prob_mod + 1:
+            await self.aida.recompute_lmdp()
+            self.n_prob_mod+=1
         if self.initialRun:
             self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
@@ -156,6 +160,9 @@ class RunTimePage(tk.Frame):
 
     # method used in the immediate run and run methods
     async def _next_finished(self):
+        if self.n_runs == self.n_prob_mod + 1:
+            await self.aida.recompute_lmdp()
+            self.n_prob_mod+=1
         if self.initialRun:
             self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
@@ -171,6 +178,7 @@ class RunTimePage(tk.Frame):
             self.initialRun = True
             self.n_runs+=1
         return service, previous_state, new_state, executed_action, finished
+
 
     def _immediateRun_while(self):
         finished = False
@@ -214,13 +222,16 @@ class RunTimePage(tk.Frame):
         data = list(self.service_map.keys())
         self.comboBox['values'] = data
         self.comboBox.current(0)
-    
+        
+        
+    async def _breakHandler(self, service_label):
+        await self.aida.send_disruption(service_label)       
     def breakHandler(self):
         with open(self.config_file) as json_file:
             data = json.load(json_file)
         break_type = data["breaking_type"]
         service_label = self.comboBox.get() #return the selected value
-        #self._send_disruption(service_label, break_type)
+        asyncio.get_event_loop().run_until_complete(self._breakHandler(service_label))
 
 
     def set_image_services(self):
@@ -278,6 +289,7 @@ class RunTimePage(tk.Frame):
             self.service_map_action[service_label] = [0, []]
         self.star_images = []
         self.n_runs = 1
+        self.n_prob_mod = 1
         self.initialRun = True
         self.planListBox.config(state="normal")
         self.planListBox.delete(1.0, END)
@@ -322,6 +334,7 @@ class RunTimePage(tk.Frame):
         self.service_map_rectangle = {}
         self.initialRun = True
         self.n_runs = 1
+        self.n_prob_mod = 1
         
         try:
             self.kill()

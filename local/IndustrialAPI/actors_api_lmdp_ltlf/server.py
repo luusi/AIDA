@@ -287,6 +287,9 @@ class Api:
         assert response.TYPE == ExecutionResult.TYPE
 
         logger.info(f"Service '{service_id}' returned result '{response}'")
+        
+        if service.service_spec.to_break:
+            service.service_spec.to_break = False
 
         # check if the result is acceptable or not
         execution_result = cast(ExecutionResult, response)
