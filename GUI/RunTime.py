@@ -139,9 +139,6 @@ class RunTimePage(tk.Frame):
 
 
     async def _next(self):
-        if self.n_runs == self.n_prob_mod + 1:
-            await self.aida.recompute_lmdp()
-            self.n_prob_mod+=1
         if self.initialRun:
             self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
@@ -153,17 +150,16 @@ class RunTimePage(tk.Frame):
         self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
         self.planListBox.see(END)
         if finished:
+            msgbox.showinfo(f"Run {self.n_runs-1}", f"Run {self.n_runs-1} finished!\nContinue to re-compute LMDP...")
             self.initialRun = True
             self.n_runs+=1
+            await self.aida.recompute_lmdp()
     def next(self):
         asyncio.get_event_loop().run_until_complete(self._next())
 
 
     # method used in the immediate run and run methods
     async def _next_finished(self):
-        if self.n_runs == self.n_prob_mod + 1:
-            await self.aida.recompute_lmdp()
-            self.n_prob_mod+=1
         if self.initialRun:
             self.insert_text(f"RUN {self.n_runs}\n")
             self.initialRun = False
@@ -175,9 +171,9 @@ class RunTimePage(tk.Frame):
         self.insert_text(f"{service} : {executed_action}\n\t{previous_state} -> {new_state}\n")
         self.planListBox.see(END)
         if finished:
-            #msgbox.showinfo(f"Run completed!", f"Run {self.n_runs} completed!")
             self.initialRun = True
             self.n_runs+=1
+            self.n_prob_mod+=1
         return service, previous_state, new_state, executed_action, finished
 
 
@@ -188,11 +184,11 @@ class RunTimePage(tk.Frame):
     def _immediateRun(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        #t1 = loop.create_task(self._immediateRun_while())
         loop.run_until_complete(self._immediateRun_while())
     def immediateRun(self):
         thread = threading.Thread(target=self._immediateRun)
         thread.start()
+        self.monitor(thread)
 
     def _run_while(self):
         finished = False
@@ -202,11 +198,25 @@ class RunTimePage(tk.Frame):
     def _run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        #loop.create_task(self._run_while())
         loop.run_until_complete(self._run_while())
     def run(self):
         thread = threading.Thread(target=self._run)
         thread.start()
+        self.monitor(thread)
+        
+    
+    def monitor(self, thread):
+        if thread.is_alive():
+            self.after(100, lambda: self.monitor(thread))
+        else:
+            msgbox.showinfo(f"Run {self.n_runs-1}", f"Run {self.n_runs-1} finished!\nContinute to re-compute LMDP...")
+            self.recomputelmdp()
+
+
+    async def _recomputelmdp(self):
+        await self.aida.recompute_lmdp()
+    def recomputelmdp(self):
+        asyncio.get_event_loop().run_until_complete(self._recomputelmdp())
 
 
     def kill(self):

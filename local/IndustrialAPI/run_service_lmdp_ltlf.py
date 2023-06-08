@@ -120,6 +120,10 @@ class ServiceDevice:
         self.wrapper._service.to_break = True
         self.logger.info("Service set to break")
 
+    @_handle.register
+    async def _handle_update_probabilities(self, message: UpdateProbabilities, websocket: WebSocket):
+        self.logger.info("")
+
 
 def main(spec):
     """Start service."""

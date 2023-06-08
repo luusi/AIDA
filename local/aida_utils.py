@@ -121,3 +121,9 @@ class AIDAUtils:
     async def break_service(self, service_id):
         await self.client.break_next_service(service_id)
 
+
+    def change_probabilities(self, n_runs):
+        services : List[ServiceInstance] = self.get_services()
+        for service in services:
+            print()
+            # update probabilities through client
