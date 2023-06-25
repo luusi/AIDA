@@ -54,6 +54,11 @@ pip install -e .
 - Install [Lydia](https://github.com/whitemech/lydia). 
   We suggest to install it by [building it from source](https://github.com/whitemech/lydia#build-from-source).
 
+- Install [xterm](https://invisible-island.net/xterm/).
+```bash
+apt install xterm
+```
+
 - Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file):
 ```bash
 cd local/IndustrialAPI/actors_api_lmdp_ltlf/openapi_client_script
