@@ -56,7 +56,12 @@ pip install -e .
 
 - Install [xterm](https://invisible-island.net/xterm/).
 ```bash
-apt install xterm
+sudo apt install xterm
+```
+
+- Install Python GUI Tkinter module:
+```bash
+sudo apt install python3-tk
 ```
 
 - Generate Python client from OpenAPI v3.0 specification (maybe you need to change permissions of the script file):
