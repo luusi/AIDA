@@ -85,6 +85,11 @@ class DoMaintenance(Message):
     TYPE = "do_maintenance"
 
 
+class UpdateProbabilities(Message):
+    
+    TYPE = "update_probabilities"
+
+
 def from_json(obj: Dict) -> Message:
 
     message_type = obj["type"]
@@ -114,6 +119,8 @@ def from_json(obj: Dict) -> Message:
             return BreakService(payload["action"])
         case BreakNextService.TYPE:
             return BreakNextService(payload["action"])
+        case UpdateProbabilities.TYPE:
+            return UpdateProbabilities()
 
     raise ValueError(f"message type {message_type} not expected")
 
@@ -201,4 +208,11 @@ def break_next_service_to_json(message: BreakNextService):
     return dict(
         type=message.TYPE,
         payload=dict(action=message.action)
+    )
+
+@to_json.register
+def update_probabilities(message: UpdateProbabilities):
+    return dict(
+        type=message.TYPE,
+        payload=dict()
     )

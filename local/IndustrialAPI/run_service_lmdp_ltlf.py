@@ -15,7 +15,7 @@ from local.IndustrialAPI.utils.wrappers import initialize_wrapper
 from local.IndustrialAPI.actors_api_lmdp_ltlf.client_wrapper import WebSocketWrapper
 from local.IndustrialAPI.actors_api_lmdp_ltlf.data import ServiceInstance
 from local.IndustrialAPI.actors_api_lmdp_ltlf.helpers import setup_logger
-from local.IndustrialAPI.actors_api_lmdp_ltlf.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance, BreakService, BreakNextService
+from local.IndustrialAPI.actors_api_lmdp_ltlf.messages import Register, Message, ExecuteServiceAction, ExecutionResult, DoMaintenance, BreakService, BreakNextService, UpdateProbabilities
 from local.IndustrialAPI.utils import constants
 
 class ServiceDevice:
@@ -122,7 +122,9 @@ class ServiceDevice:
 
     @_handle.register
     async def _handle_update_probabilities(self, message: UpdateProbabilities, websocket: WebSocket):
-        self.logger.info("")
+        self.logger.info(f"Processing message of type '{message.TYPE}'")
+        self.logger.info("Updating probabilities")
+        self.logger.info("Probabilities updated")
 
 
 def main(spec):
