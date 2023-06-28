@@ -1,6 +1,6 @@
 <div align="center">    
 
-# AIDA
+# AIDA (policy-based)
 
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=black)
 ![Python](https://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54)
